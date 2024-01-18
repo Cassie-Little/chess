@@ -18,8 +18,11 @@ public class ChessBoard {
      * @param position where to add the piece to
      * @param piece    the piece to add
      */
+    private ChessPiece[][] spots = new ChessPiece[8][8];
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        spots[position.getRow()][position.getColumn()]  = piece;
+
+
     }
 
     /**
@@ -29,8 +32,8 @@ public class ChessBoard {
      * @return Either the piece at the position, or null if no piece is at that
      * position
      */
-    public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+    public  ChessPiece getPiece(ChessPosition position) {
+        return spots[position.getRow()][position.getColumn()];
     }
 
     /**
