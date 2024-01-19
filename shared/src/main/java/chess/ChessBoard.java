@@ -20,7 +20,7 @@ public class ChessBoard {
      */
     private ChessPiece[][] spots = new ChessPiece[8][8];
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        spots[position.getRow()][position.getColumn()]  = piece;
+        spots[position.getRow() -1 ][position.getColumn() - 1]  = piece;
 
 
     }
@@ -33,7 +33,7 @@ public class ChessBoard {
      * position
      */
     public  ChessPiece getPiece(ChessPosition position) {
-        return spots[position.getRow()][position.getColumn()];
+        return spots[position.getRow() -1 ][position.getColumn() -1 ];
     }
 
     /**

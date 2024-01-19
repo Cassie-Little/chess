@@ -41,6 +41,14 @@ public class ChessPiece {
     public PieceType getPieceType() {
         return type;
     }
+    public static boolean isInbounds(int row, int col) {
+        if (row >= 1 && col >= 1) {
+            if (row <= 8 && col <= 8) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Calculates all the positions a chess piece can move to
@@ -50,6 +58,9 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+       return switch(type){
+            case BISHOP -> new BishopMoves().bishopPieceMoves(board, myPosition, this);
+            default -> throw new RuntimeException( type + " not implemented");
+        };
     }
 }
