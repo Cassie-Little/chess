@@ -6,57 +6,50 @@ import java.util.HashSet;
 public class PawnMoves {
     public PawnMoves() {
     }
+
     public Collection<ChessMove> pawnPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
         HashSet<ChessMove> listOfMoves = new HashSet<>();
         forwardWhite(board, myPosition, myPiece, listOfMoves);
         forwardBlack(board, myPosition, myPiece, listOfMoves);
         return listOfMoves;
     }
+
     private void forwardWhite(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
-        int tempRow = myPosition.getRow();
-        int tempCol = myPosition.getColumn();
-        int i = 1;
-        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
-            while (i == 1) {
-                tempRow += 1;
-                ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
-                    break;
-                }
-                i++;
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+            addIfValidMove(board, myPosition, new ChessPosition(row + 1, col), myPiece, false, possibleMoves);
+            addIfValidMove(board, myPosition, new ChessPosition(row + 1, col + 1), myPiece, true, possibleMoves);
+            addIfValidMove(board, myPosition, new ChessPosition(row +1 , col - 1),myPiece , true, possibleMoves);
+            if (myPosition.getRow() == 2 && board.getPiece(new ChessPosition(row +1, col )) == null) {
+                addIfValidMove(board, myPosition, new ChessPosition(row + 2, col), myPiece, false, possibleMoves);
             }
         }
     }
+
     private void forwardBlack(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
-        int tempRow = myPosition.getRow();
-        int tempCol = myPosition.getColumn();
-        int i = 1;
-        if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK){
-            while (i == 1) {
-                tempRow -= 1;
-                ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
-                    break;
-                }
-                i++;
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            addIfValidMove(board, myPosition, new ChessPosition(row - 1, col), myPiece, false, possibleMoves);
+            addIfValidMove(board, myPosition, new ChessPosition(row - 1, col + 1), myPiece, true, possibleMoves);
+            addIfValidMove(board, myPosition, new ChessPosition(row - 1 , col - 1),myPiece , true, possibleMoves);
+            if (myPosition.getRow() == 7 && board.getPiece(new ChessPosition(row - 1, col )) == null) {
+                addIfValidMove(board, myPosition, new ChessPosition(row - 2, col), myPiece, false, possibleMoves);
             }
         }
     }
-    private boolean addIfValidMove(ChessBoard board, ChessPosition myPosition, ChessPosition endPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
+
+    private void addIfValidMove(ChessBoard board, ChessPosition myPosition, ChessPosition endPosition,
+                                ChessPiece myPiece, boolean isDiag, Collection<ChessMove> possibleMoves) {
         if (ChessPiece.isInbounds(endPosition.getRow(), endPosition.getColumn())) {
             ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null) {
-                possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.PAWN ));
-                return true;
-            }
-            else {
-                if (piece.getTeamColor() != myPiece.getTeamColor()){
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.PAWN ));
-                }
-                return false;
+            if (piece == null && !isDiag) {
+                possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.PAWN));
+            } else if (piece != null && isDiag && piece.getTeamColor() != myPiece.getTeamColor()) {
+                possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.PAWN));
             }
         }
-        return false;
     }
 
 }
