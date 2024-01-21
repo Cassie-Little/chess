@@ -18,11 +18,11 @@ public class PawnMoves {
         int i = 1;
         if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE){
             while (i == 1) {
+                tempRow += 1;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
                 if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                     break;
                 }
-                tempRow += 1;
                 i++;
             }
         }
