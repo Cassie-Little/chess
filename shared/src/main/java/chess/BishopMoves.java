@@ -7,7 +7,6 @@ import java.util.HashSet;
 public class BishopMoves {
 
     public BishopMoves(){
-
     }
     public Collection<ChessMove> bishopPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece){
         HashSet<ChessMove> listOfMoves = new HashSet<>();
