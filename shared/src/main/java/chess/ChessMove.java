@@ -11,6 +11,7 @@ import java.util.Objects;
 public class ChessMove {
     private final ChessPosition start;
     private final ChessPosition end;
+
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
         this.start = startPosition;
@@ -61,6 +62,18 @@ public class ChessMove {
      * @return Type of piece to promote a pawn to, or null if no promotion
      */
     public ChessPiece.PieceType getPromotionPiece() {
-        throw new RuntimeException("Not implemented");
+        return null;
+        //throw new RuntimeException("Not implemented");
+    }
+
+    private void canBePromoted(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
+        if (myPiece.getPieceType() == ChessPiece.PieceType.PAWN
+                && myPiece.getTeamColor() == ChessGame.TeamColor.WHITE
+                && myPosition.getRow() == 8) {
+            ChessPiece.QueenMoves(board, myPosition, myPiece);
+        }
+
+
+        throw new RuntimeException("not implemented");
     }
 }

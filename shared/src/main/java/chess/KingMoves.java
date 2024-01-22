@@ -6,6 +6,7 @@ import java.util.HashSet;
 public class KingMoves {
     public KingMoves() {
     }
+
     public Collection<ChessMove> kingPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
         HashSet<ChessMove> listOfMoves = new HashSet<>();
         up(board, myPosition, myPiece, listOfMoves);
@@ -18,47 +19,34 @@ public class KingMoves {
         diagUpLeft(board, myPosition, myPiece, listOfMoves);
         return listOfMoves;
     }
-    private void up(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void up(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
-        int i = 1;
-        while (i == 1) {
-            tempRow += 1;
-            ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
-                break;
-            }
-            i++;
-        }
+        tempRow += 1;
+        ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
+        addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves);
     }
-    private void diagUpRight(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+
+    private void diagUpRight(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
-        int i = 1;
-        while (i == 1) {
-            tempRow += 1;
-            tempCol += 1;
-            ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
-                break;
-            }
-            i++;
-        }
+        tempRow += 1;
+        tempCol += 1;
+        ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
+        addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves);
     }
-    private void right(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void right(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
-        int i = 1;
-        while (i == 1) {
-            tempCol += 1;
-            ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
-                break;
-            }
-            i++;
-        }
+        tempCol += 1;
+        ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
+        addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves);
     }
-    private void diagDownRight(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void diagDownRight(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
         int i = 1;
@@ -66,26 +54,28 @@ public class KingMoves {
             tempRow -= 1;
             tempCol += 1;
             ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+            if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                 break;
             }
             i++;
         }
     }
-    private void down(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void down(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
         int i = 1;
         while (i == 1) {
             tempRow -= 1;
             ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+            if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                 break;
             }
             i++;
         }
     }
-    private void diagDownLeft(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void diagDownLeft(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
         int i = 1;
@@ -93,26 +83,28 @@ public class KingMoves {
             tempRow -= 1;
             tempCol -= 1;
             ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+            if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                 break;
             }
             i++;
         }
     }
-    private void left(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void left(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
         int i = 1;
         while (i == 1) {
             tempCol -= 1;
             ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+            if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                 break;
             }
             i++;
         }
     }
-    private void diagUpLeft(ChessBoard board, ChessPosition myPosition,ChessPiece myPiece, Collection<ChessMove> possibleMoves){
+
+    private void diagUpLeft(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempRow = myPosition.getRow();
         int tempCol = myPosition.getColumn();
         int i = 1;
@@ -120,22 +112,22 @@ public class KingMoves {
             tempRow += 1;
             tempCol -= 1;
             ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+            if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                 break;
             }
             i++;
         }
     }
+
     private boolean addIfValidMove(ChessBoard board, ChessPosition myPosition, ChessPosition endPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         if (ChessPiece.isInbounds(endPosition.getRow(), endPosition.getColumn())) {
             ChessPiece piece = board.getPiece(endPosition);
             if (piece == null) {
-                possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KING ));
+                possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KING));
                 return true;
-            }
-            else {
-                if (piece.getTeamColor() != myPiece.getTeamColor()){
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KING ));
+            } else {
+                if (piece.getTeamColor() != myPiece.getTeamColor()) {
+                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KING));
                 }
                 return false;
             }
