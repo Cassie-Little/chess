@@ -49,6 +49,15 @@ public class ChessMove {
         return Objects.hash(start, end, promotion);
     }
 
+    @Override
+    public String toString() {
+        return "ChessMove{" +
+                "start=" + start +
+                ", end=" + end +
+                ", promotion=" + promotion +
+                '}';
+    }
+
     /**
      * Gets the type of piece to promote a pawn to if pawn promotion is part of this
      * chess move

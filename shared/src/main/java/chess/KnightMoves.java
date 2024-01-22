@@ -135,12 +135,12 @@ public class KnightMoves {
         if (ChessPiece.isInbounds(endPosition.getRow(), endPosition.getColumn())) {
             ChessPiece piece = board.getPiece(endPosition);
             if (piece == null) {
-                possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT ));
+                possibleMoves.add(new ChessMove(myPosition, endPosition, null ));
                 return true;
             }
             else {
                 if (piece.getTeamColor() != myPiece.getTeamColor()){
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT ));
+                    possibleMoves.add(new ChessMove(myPosition, endPosition, null ));
                 }
                 return false;
             }
