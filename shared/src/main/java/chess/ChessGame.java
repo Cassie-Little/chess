@@ -42,7 +42,6 @@ public class ChessGame {
     }
 
 
-
     /**
      * Gets a valid moves for a piece at the given location
      *
@@ -56,9 +55,9 @@ public class ChessGame {
             return null;
         }
         HashSet<ChessMove> possibleMoves = new HashSet<>();
-        for (var move : piece.pieceMoves(board, startPosition)){
+        for (var move : piece.pieceMoves(board, startPosition)) {
             var testBoard = board.copy();
-            if (testBoard.chessMove(move) && !isInCheck(testBoard, piece.getTeamColor())){
+            if (testBoard.chessMove(move) && !isInCheck(testBoard, piece.getTeamColor())) {
                 possibleMoves.add(move);
             }
         }
@@ -84,7 +83,8 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         return isInCheck(board, teamColor);
     }
-    private static boolean isInCheck (ChessBoard board,TeamColor teamColor){
+
+    private static boolean isInCheck(ChessBoard board, TeamColor teamColor) {
 
         var kingPosition = board.getPiecePositions(ChessPiece.PieceType.KING, teamColor).getFirst();
         for (int col = 1; col <= 8; col++) {
@@ -92,7 +92,7 @@ public class ChessGame {
                 var chessPosition = new ChessPosition(row, col);
                 var piece = board.getPiece(chessPosition);
                 if (piece != null && piece.getTeamColor() != teamColor) {
-                    for (var move: piece.pieceMoves(board, chessPosition)){
+                    for (var move : piece.pieceMoves(board, chessPosition)) {
                         if (move.getEndPosition().equals(kingPosition)) {
                             return true;
                         }
@@ -104,7 +104,6 @@ public class ChessGame {
     }
 
 
-
     /**
      * Determines if the given team is in checkmate
      *
@@ -112,12 +111,12 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        if (isInCheck(teamColor)){
+        if (isInCheck(teamColor)) {
             var kingPosition = board.getPiecePositions(ChessPiece.PieceType.KING, teamColor).getFirst();
             var king = board.getPiece(kingPosition);
-            for ( var move : king.pieceMoves(board, kingPosition)){
+            for (var move : king.pieceMoves(board, kingPosition)) {
                 var testBoard = board.copy();
-                if (testBoard.chessMove(move) && !isInCheck(testBoard, king.getTeamColor())){
+                if (testBoard.chessMove(move) && !isInCheck(testBoard, king.getTeamColor())) {
                     return false;
                 }
             }
@@ -134,24 +133,21 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        if (isInCheck(teamColor)) {
             for (int col = 1; col <= 8; col++) {
                 for (int row = 1; row <= 8; row++) {
                     var chessPosition = new ChessPosition(row, col);
                     var piece = board.getPiece(chessPosition);
-                    // logic does't make sense here
-                    if (piece != null && piece.getTeamColor() != teamColor) {
+                    if (piece != null && piece.getTeamColor() == teamColor) {
                         for (var move : piece.pieceMoves(board, chessPosition)) {
                             var testBoard = board.copy();
-                            if (testBoard.chessMove(move) && !isInCheck(testBoard, piece.getTeamColor())) {
-                                return false;
+                            if (testBoard.chessMove(move) && isInCheck(testBoard, piece.getTeamColor())) {
+                                return true;
                             }
                         }
+                        return false;
                     }
-                    return true;
                 }
             }
-        }
 
         return false;
     }
