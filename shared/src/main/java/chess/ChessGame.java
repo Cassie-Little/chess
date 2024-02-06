@@ -72,11 +72,14 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
        var piece = board.getPiece(move.getStartPosition());
-       if (piece.getTeamColor() != teamTurn || !isInCheck(piece.getTeamColor()) || !isInStalemate(piece.getTeamColor())){
-           board.chessMove(move);
+       if (piece.getTeamColor() != teamTurn || isInCheck(piece.getTeamColor())
+               || isInStalemate(piece.getTeamColor()) || isInCheckmate(piece.getTeamColor())
+               || validMoves(move.getStartPosition() )== null) {
+                throw new InvalidMoveException("Invalid Move.");
        }
+
        else {
-           throw new InvalidMoveException("Invalid Move.");
+               board.chessMove(move);
        }
     }
 
