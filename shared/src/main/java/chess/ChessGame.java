@@ -71,16 +71,29 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-       var piece = board.getPiece(move.getStartPosition());
-       if (piece.getTeamColor() != teamTurn || isInCheck(piece.getTeamColor())
-               || isInStalemate(piece.getTeamColor()) || isInCheckmate(piece.getTeamColor())
-               || validMoves(move.getStartPosition() )== null) {
-                throw new InvalidMoveException("Invalid Move.");
-       }
-
-       else {
-               board.chessMove(move);
-       }
+        var piece = board.getPiece(move.getStartPosition());
+//       if (piece.getTeamColor() != teamTurn || isInCheck(piece.getTeamColor())
+//               || isInStalemate(piece.getTeamColor()) || isInCheckmate(piece.getTeamColor())
+//               || !validMoves(move.getStartPosition()).contains(move)) {
+//                throw new InvalidMoveException("Invalid Move.");
+//       }
+        if (piece.getTeamColor() != teamTurn) {
+            throw new InvalidMoveException("Not your tean");
+        } else if (isInStalemate(teamTurn)) {
+            throw new InvalidMoveException("Stale");
+        } else if (isInCheckmate(teamTurn)) {
+            throw new InvalidMoveException("in check mate");
+        } else if (!validMoves(move.getStartPosition()).contains(move)) {
+            throw new InvalidMoveException("not in valid moves");
+        } else {
+            board.chessMove(move);
+            if (piece.getTeamColor() == TeamColor.WHITE) {
+                teamTurn = TeamColor.BLACK;
+            } else if (piece.getTeamColor() == TeamColor.BLACK) {
+                teamTurn = TeamColor.WHITE;
+            }
+            //make sure to change the team
+        }
     }
 
     /**
@@ -94,22 +107,26 @@ public class ChessGame {
     }
 
     private static boolean isInCheck(ChessBoard board, TeamColor teamColor) {
-
-        var kingPosition = board.getPiecePositions(ChessPiece.PieceType.KING, teamColor).getFirst();
-        for (int col = 1; col <= 8; col++) {
-            for (int row = 1; row <= 8; row++) {
-                var chessPosition = new ChessPosition(row, col);
-                var piece = board.getPiece(chessPosition);
-                if (piece != null && piece.getTeamColor() != teamColor) {
-                    for (var move : piece.pieceMoves(board, chessPosition)) {
-                        if (move.getEndPosition().equals(kingPosition)) {
-                            return true;
+        var kingOnBoard = board.getPiecePositions(ChessPiece.PieceType.KING, teamColor);
+        if (kingOnBoard.isEmpty()) {
+            return false;
+        } else {
+            var kingPosition = kingOnBoard.getFirst();
+            for (int col = 1; col <= 8; col++) {
+                for (int row = 1; row <= 8; row++) {
+                    var chessPosition = new ChessPosition(row, col);
+                    var piece = board.getPiece(chessPosition);
+                    if (piece != null && piece.getTeamColor() != teamColor) {
+                        for (var move : piece.pieceMoves(board, chessPosition)) {
+                            if (move.getEndPosition().equals(kingPosition)) {
+                                return true;
+                            }
                         }
                     }
                 }
             }
+            return false;
         }
-        return false;
     }
 
 
@@ -142,22 +159,20 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-            for (int col = 1; col <= 8; col++) {
-                for (int row = 1; row <= 8; row++) {
-                    var chessPosition = new ChessPosition(row, col);
-                    var piece = board.getPiece(chessPosition);
-                    if (piece != null && piece.getTeamColor() == teamColor) {
-                        for (var move : piece.pieceMoves(board, chessPosition)) {
-                            var testBoard = board.copy();
-                            if (testBoard.chessMove(move) && isInCheck(testBoard, piece.getTeamColor())) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
+        boolean doesTeamHaveAMove = false;
+        for (int col = 1; col <= 8; col++) {
+            for (int row = 1; row <= 8; row++) {
+                var chessPosition = new ChessPosition(row, col);
+                var piece = board.getPiece(chessPosition);
+                if (piece != null && piece.getTeamColor() == teamColor && !validMoves(chessPosition).isEmpty()) {
+                    doesTeamHaveAMove = true;
+
                 }
             }
-
+        }
+        if (!isInCheck(teamColor) && doesTeamHaveAMove == false){
+            return true;
+        }
         return false;
     }
 
