@@ -59,6 +59,7 @@ public class ChessGame {
             var testBoard = board.copy();
             if (testBoard.chessMove(move) && !isInCheck(testBoard, piece.getTeamColor())) {
                 possibleMoves.add(move);
+
             }
         }
         return possibleMoves;
@@ -78,7 +79,7 @@ public class ChessGame {
 //                throw new InvalidMoveException("Invalid Move.");
 //       }
         if (piece.getTeamColor() != teamTurn) {
-            throw new InvalidMoveException("Not your tean");
+            throw new InvalidMoveException("Not your team");
         } else if (isInStalemate(teamTurn)) {
             throw new InvalidMoveException("Stale");
         } else if (isInCheckmate(teamTurn)) {
@@ -87,14 +88,20 @@ public class ChessGame {
             throw new InvalidMoveException("not in valid moves");
         } else {
             board.chessMove(move);
+            var promo = move.getPromotionPiece();
+            if (promo != null){
+                piece.setPieceType(promo);
+            }
             if (piece.getTeamColor() == TeamColor.WHITE) {
                 teamTurn = TeamColor.BLACK;
             } else if (piece.getTeamColor() == TeamColor.BLACK) {
                 teamTurn = TeamColor.WHITE;
             }
-            //make sure to change the team
+
+
         }
     }
+
 
     /**
      * Determines if the given team is in check

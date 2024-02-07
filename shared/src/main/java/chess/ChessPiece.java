@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class ChessPiece {
     private final ChessGame.TeamColor color;
-    private final ChessPiece.PieceType type;
+    private ChessPiece.PieceType type;
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.color =  pieceColor;
         this.type = type;
@@ -63,6 +63,9 @@ public class ChessPiece {
     public PieceType getPieceType() {
         return type;
     }
+    public void setPieceType(PieceType pieceType) {
+        type = pieceType;
+    }
     public static boolean isInbounds(int row, int col) {
         if (row >= 1 && col >= 1) {
             if (row <= 8 && col <= 8) {
@@ -71,6 +74,7 @@ public class ChessPiece {
         }
         return false;
     }
+
 
     /**
      * Calculates all the positions a chess piece can move to
