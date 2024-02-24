@@ -31,6 +31,8 @@ public class Server {
         new SessionResource(new SessionService(userDAO), gson).loginRoutes();
         new SessionResource(new SessionService(userDAO), gson).logoutRoutes();
         new GameResource(new GameService(gameDAO), gson).listGamesRoutes();
+        new GameResource(new GameService(gameDAO), gson).createGameRoutes();
+        new GameResource(new GameService(gameDAO), gson).joinGame();
         Spark.awaitInitialization();
         return Spark.port();
     }
