@@ -22,6 +22,7 @@ public class Server {
         new ClearResource().registerRoutes();
         new UserResource(new UserService(userDAO), gson).registerRoutes();
         new SessionResource(new SessionService(userDAO), gson).loginRoutes();
+        new SessionResource(new SessionService(userDAO), gson).logoutRoutes();
         Spark.awaitInitialization();
         return Spark.port();
     }

@@ -16,4 +16,8 @@ public class MemoryUserDAO implements UserDAO{
         System.out.print("logged in");
         return new AuthData(UUID.randomUUID().toString(), userData.username());
     }
+    public AuthData logout() {
+        System.out.print("logged out");
+        return null;
+    }
 }

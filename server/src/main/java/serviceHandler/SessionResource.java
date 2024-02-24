@@ -25,4 +25,11 @@ public class SessionResource {
         var authData = this.sessionService.login(userData);
         return serializer.toJson(authData);
     }
+    public void logoutRoutes(){
+        Spark.delete("/session", this::logoutRequest);
+    }
+    private String logoutRequest(Request request, Response response) {
+        this.sessionService.logout();
+        return "";
+    }
 }
