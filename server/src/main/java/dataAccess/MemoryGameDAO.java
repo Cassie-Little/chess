@@ -1,26 +1,43 @@
 package dataAccess;
 import model.GameData;
 import model.AuthData;
+import model.GameListData;
+import model.JoinGameData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
+    private final Map<Integer, GameData> gameDB;
+    public MemoryGameDAO() {
+        this.gameDB = new HashMap<>();
+    }
 
     @Override
     public void clear() {
-       System.out.print("hello from memory game dao");
+        gameDB.clear();
     }
-    public AuthData listGames(GameData gameData){
-        System.out.printf("games: [ gameID: %s, whiteUsername: %s, blackUsername: %s, gameName: %s]",
-                gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName());
-        return null;
-    }
-    public AuthData createGame(GameData gameData) {
-        System.out.printf("gameID: %s", gameData.gameID());
-        return null;
-    }
+
     @Override
-    public AuthData joinGame(GameData gameData) {
-        System.out.print("joined game");
+    public GameListData listGames() {
         return null;
     }
 
+    @Override
+    public int createGame(String gameName) {
+        return 0;
+    }
+
+    @Override
+    public void updateGame(int gameID, GameData gameData) {
+
+    }
+
+    @Override
+    public GameData getGame(int gameID) {
+        if (gameDB.containsKey(gameID)){
+            return this.gameDB.get(gameID);
+        }
+        return null;
+    }
 }

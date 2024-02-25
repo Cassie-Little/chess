@@ -1,14 +1,18 @@
 package dataAccess;
 
-import model.AuthData;
 import model.GameData;
+import model.GameListData;
+import model.JoinGameData;
 
 public interface GameDAO {
     void clear();
-    AuthData listGames(GameData gameData);
+    GameListData listGames();
 
-    AuthData createGame(GameData gameData);
+    int createGame(String gameName);
 
-    AuthData joinGame(GameData gameData);
+    void updateGame(int gameID, GameData gameData);
+
+    GameData getGame(int gameID);
+
 }
 

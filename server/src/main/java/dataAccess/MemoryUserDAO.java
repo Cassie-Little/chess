@@ -3,21 +3,38 @@ package dataAccess;
 import model.UserData;
 import model.AuthData;
 
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
-public class MemoryUserDAO implements UserDAO{
+public class MemoryUserDAO implements UserDAO {
+    private final Map<String, UserData> userDB;
+
+    public MemoryUserDAO() {
+        this.userDB = new HashMap<>();
+    }
+
     @Override
-    public AuthData register(UserData userData) {
-        System.out.printf("username: %s, password: %s, email: %s",
-                userData.username(), userData.password(), userData.email());
-        return new AuthData(UUID.randomUUID().toString(), userData.username());
+    public void createUser(UserData userData) throws DataAccessException {
+        if (
+                userData.username() == null || userData.username().isBlank() ||
+                userData.password() == null || userData.password().isBlank() ||
+                userData.email() == null || userData.email().isBlank()) {
+            throw new DataAccessException("Error: bad request");
+        }
+        if (userDB.containsKey(userData.username())) {
+            throw new DataAccessException("Error: already taken");
+        }
+        this.userDB.put(userData.username(), userData);
+
     }
-    public AuthData login(UserData userData) {
-        System.out.print("logged in");
-        return new AuthData(UUID.randomUUID().toString(), userData.username());
-    }
-    public AuthData logout() {
-        System.out.print("logged out");
-        return null;
+
+    @Override
+    public UserData getUser(String username) throws DataAccessException {
+        if (userDB.containsKey(username)){
+            return this.userDB.get(username);
+        }
+        throw new DataAccessException("Error: unknown username");
     }
 }

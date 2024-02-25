@@ -1,9 +1,8 @@
 package serviceHandler;
 
 import com.google.gson.Gson;
-import dataAccess.MemoryGameDAO;
+import dataAccess.DataAccessException;
 import model.UserData;
-import service.ClearService;
 import service.UserService;
 import spark.Request;
 import spark.Response;
@@ -20,8 +19,21 @@ public class UserResource {
         Spark.post("/user", this::registerRequest);
     }
     private String registerRequest(Request request, Response response){
-        var userData = serializer.fromJson(request.body(), UserData.class);
-        var authData = this.userService.register(userData);
-        return serializer.toJson(authData);
+        try {
+            var userData = serializer.fromJson(request.body(), UserData.class);
+            var authData = this.userService.register(userData);
+            return serializer.toJson(authData);
+        }
+        catch (DataAccessException e){
+            if (e.getMessage().equals("Error: bad request")) {
+                response.status(400);
+
+            } else if (e.getMessage().equals("Error: already taken")) {
+                response.status(403);
+            } else {
+                response.status(500);
+            }
+            return e.getMessage();
+        }
     }
 }

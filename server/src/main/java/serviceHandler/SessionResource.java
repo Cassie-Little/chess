@@ -1,6 +1,7 @@
 package serviceHandler;
 
 import com.google.gson.Gson;
+import dataAccess.DataAccessException;
 import dataAccess.MemoryUserDAO;
 import model.UserData;
 import service.SessionService;
@@ -17,19 +18,30 @@ public class SessionResource {
         this.serializer = serializer;
     }
 
-    public void loginRoutes(){
+    public void registerRoutes(){
         Spark.post("/session", this::loginRequest);
-    }
-    private String loginRequest(Request request, Response response){
-        var userData = serializer.fromJson(request.body(), UserData.class);
-        var authData = this.sessionService.login(userData);
-        return serializer.toJson(authData);
-    }
-    public void logoutRoutes(){
         Spark.delete("/session", this::logoutRequest);
     }
+    private String loginRequest(Request request, Response response){
+        try {
+            var userData = serializer.fromJson(request.body(), UserData.class);
+            var authData = this.sessionService.login(userData);
+            return serializer.toJson(authData);
+        }
+        catch (DataAccessException e){
+            if (e.getMessage().equals("Error: unauthorized")){
+                response.status(401);
+            }
+            else {
+                response.status(500);
+            }
+            return e.getMessage();
+        }
+    }
+
     private String logoutRequest(Request request, Response response) {
-        this.sessionService.logout();
+        var authToken = request.headers("authorization");
+        this.sessionService.logout(authToken);
         return "";
     }
 }
