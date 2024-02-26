@@ -1,4 +1,5 @@
 import com.google.gson.Gson;
+import dataAccess.AuthDAO;
 import dataAccess.MemoryAuthDAO;
 import dataAccess.MemoryGameDAO;
 import dataAccess.MemoryUserDAO;
@@ -24,8 +25,8 @@ public class Server {
         var authDAO = new MemoryAuthDAO();
         var gson = new Gson();
         new UserResource(new UserService(userDAO, authDAO), gson).registerRoutes();
-        new SessionResource(new SessionService(userDAO), gson).registerRoutes();
-        new GameResource(new GameService(gameDAO), gson).registerRoutes();
+        new SessionResource(new SessionService(userDAO, authDAO), gson).registerRoutes();
+        new GameResource(new GameService(gameDAO, userDAO, authDAO), gson, authDAO).registerRoutes();
         Spark.awaitInitialization();
         return Spark.port();
     }

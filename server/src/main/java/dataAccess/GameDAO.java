@@ -8,9 +8,9 @@ public interface GameDAO {
     void clear();
     GameListData listGames();
 
-    int createGame(String gameName);
+    int createGame(String gameName, GameData gameData);
 
-    void updateGame(int gameID, GameData gameData);
+    void joinGame(String authToken, JoinGameData gameData);
 
     GameData getGame(int gameID);
 

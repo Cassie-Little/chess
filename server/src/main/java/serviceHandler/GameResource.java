@@ -1,7 +1,8 @@
 package serviceHandler;
 
 import com.google.gson.Gson;
-import dataAccess.GameDAO;
+import dataAccess.AuthDAO;
+import dataAccess.DataAccessException;
 import model.GameData;
 import model.JoinGameData;
 import service.GameService;
@@ -13,11 +14,13 @@ public class GameResource {
     //final GameDAO gameDAO;
     final Gson serializer;
     final GameService gameService;
+    final AuthDAO authDAO;
 
 
-    public GameResource(GameService gameService, Gson serializer) {
+    public GameResource(GameService gameService, Gson serializer, AuthDAO authDAO) {
         this.serializer = serializer;
         this.gameService = gameService;
+        this.authDAO = authDAO;
     }
 
     public void registerRoutes() {
@@ -27,29 +30,71 @@ public class GameResource {
         Spark.put("/game", this::joinGameRequest);
     }
 
+
+
     private String clearRequest(Request request, Response response) {
         this.gameService.clear();
         return "";
     }
 
     private String listGamesRequest(Request request, Response response) {
-        var authToken = request.queryParams("authorization");
-        var games = this.gameService.listGames(authToken);
-        return serializer.toJson(games);
+        try {
+            var authToken = request.headers("authorization");
+            authDAO.getUsername(authToken);
+            var games = this.gameService.listGames();
+            return serializer.toJson(games);
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("Error: unauthorized")) {
+                response.status(401);
+            }
+            else {
+                response.status(500);
+            }
+            return e.getMessage();
+        }
     }
-
 
     private String createGameRequest(Request request, Response response) {
-        var authToken = request.queryParams("authorization");
-        var inputGameData = serializer.fromJson(request.body(), GameData.class);
-        var gameData = this.gameService.createGame(authToken, inputGameData);
-        return serializer.toJson(gameData);
-    }
+        try {
+            var authToken = request.headers("authorization");
+            authDAO.getUsername(authToken);
+            var inputGameData = serializer.fromJson(request.body(), GameData.class);
+            var gameData = this.gameService.createGame(authToken, inputGameData);
+            return serializer.toJson(gameData);
+        }
+        catch (DataAccessException e) {
+            if (e.getMessage().equals("Error: unauthorized")) {
+                response.status(401);
+            } else if (e.getMessage().equals("Error: bad request")) {
+                response.status(400);
+            } else {
+                response.status(500);
+            }
+            return e.getMessage();
+        }
+        }
+
 
     private String joinGameRequest(Request request, Response response) {
-        var authToken = request.queryParams("authorization");
+        try{
+        var authToken = request.headers("authorization");
+        authDAO.getUsername(authToken);
         var joinGameData = serializer.fromJson(request.body(), JoinGameData.class);
         this.gameService.joinGame(authToken, joinGameData);
         return "";
     }
+        catch (DataAccessException e) {
+            if (e.getMessage().equals("Error: unauthorized")) {
+                response.status(401);
+            } else if (e.getMessage().equals("Error: bad request")) {
+                response.status(400);
+            } else if (e.getMessage().equals("Error: already taken")) {
+                response.status(403);
+            } else {
+                response.status(500);
+            }
+            return e.getMessage();
+        }
+        }
+
 }

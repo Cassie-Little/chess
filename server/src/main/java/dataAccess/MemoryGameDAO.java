@@ -1,10 +1,11 @@
 package dataAccess;
 import model.GameData;
-import model.AuthData;
 import model.GameListData;
 import model.JoinGameData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
@@ -24,13 +25,12 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public int createGame(String gameName) {
+    public int createGame(String gameName, GameData gameData) {
         return 0;
     }
 
     @Override
-    public void updateGame(int gameID, GameData gameData) {
-
+    public void joinGame(String authToken, JoinGameData gameData) {
     }
 
     @Override

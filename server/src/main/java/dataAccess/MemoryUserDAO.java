@@ -37,4 +37,14 @@ public class MemoryUserDAO implements UserDAO {
         }
         throw new DataAccessException("Error: unknown username");
     }
+
+    @Override
+    public void clear() {
+        userDB.clear();
+    }
+
+    @Override
+    public void logout(String authToken) {
+
+    }
 }

@@ -25,13 +25,13 @@ public class SessionService {
             var authToken = authDAO.createAuth(userData.username());
             return new AuthData(authToken, userData.username());
         }
-        catch (DataAccessException ){
+        catch (DataAccessException e){
             throw new DataAccessException("Error: unauthorized");
         }
 
     }
     public void logout(String authToken){
-        //this.userDAO.logout(authToken);
+        this.userDAO.logout(authToken);
     }
 
 }
