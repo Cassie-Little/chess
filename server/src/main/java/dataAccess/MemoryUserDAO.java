@@ -43,8 +43,5 @@ public class MemoryUserDAO implements UserDAO {
         userDB.clear();
     }
 
-    @Override
-    public void logout(String authToken) {
 
-    }
 }

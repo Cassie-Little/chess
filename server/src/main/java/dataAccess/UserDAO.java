@@ -9,5 +9,4 @@ public interface UserDAO {
 
     void clear();
 
-    void logout(String authToken);
 }

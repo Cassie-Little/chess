@@ -40,8 +40,18 @@ public class SessionResource {
     }
 
     private String logoutRequest(Request request, Response response) {
-        var authToken = request.headers("authorization");
-        this.sessionService.logout(authToken);
-        return "";
+        try {
+            var authToken = request.headers("authorization");
+            this.sessionService.logout(authToken);
+            return "";
+        }
+        catch (DataAccessException e){
+            if (e.getMessage().equals("Error: unauthorized")) {
+                response.status(401);
+            }else {
+                response.status(500);
+            }
+            return e.getMessage();
+        }
     }
 }

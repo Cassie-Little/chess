@@ -19,4 +19,5 @@ public class UserService {
         var authToken = authDAO.createAuth(userData.username());
         return new AuthData(authToken, userData.username());
     }
+
 }

@@ -30,8 +30,9 @@ public class SessionService {
         }
 
     }
-    public void logout(String authToken){
-        this.userDAO.logout(authToken);
+    public void logout(String authToken) throws DataAccessException {
+        authDAO.getUsername(authToken);
+        authDAO.deleteAuth(authToken);
     }
 
 }

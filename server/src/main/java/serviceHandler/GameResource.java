@@ -31,7 +31,6 @@ public class GameResource {
     }
 
 
-
     private String clearRequest(Request request, Response response) {
         this.gameService.clear();
         return "";
@@ -40,14 +39,12 @@ public class GameResource {
     private String listGamesRequest(Request request, Response response) {
         try {
             var authToken = request.headers("authorization");
-            authDAO.getUsername(authToken);
-            var games = this.gameService.listGames();
+            var games = this.gameService.listGames(authToken);
             return serializer.toJson(games);
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {
                 response.status(401);
-            }
-            else {
+            } else {
                 response.status(500);
             }
             return e.getMessage();
@@ -57,12 +54,10 @@ public class GameResource {
     private String createGameRequest(Request request, Response response) {
         try {
             var authToken = request.headers("authorization");
-            authDAO.getUsername(authToken);
             var inputGameData = serializer.fromJson(request.body(), GameData.class);
             var gameData = this.gameService.createGame(authToken, inputGameData);
             return serializer.toJson(gameData);
-        }
-        catch (DataAccessException e) {
+        } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {
                 response.status(401);
             } else if (e.getMessage().equals("Error: bad request")) {
@@ -72,18 +67,16 @@ public class GameResource {
             }
             return e.getMessage();
         }
-        }
+    }
 
 
     private String joinGameRequest(Request request, Response response) {
-        try{
-        var authToken = request.headers("authorization");
-        authDAO.getUsername(authToken);
-        var joinGameData = serializer.fromJson(request.body(), JoinGameData.class);
-        this.gameService.joinGame(authToken, joinGameData);
-        return "";
-    }
-        catch (DataAccessException e) {
+        try {
+            var authToken = request.headers("authorization");
+            var joinGameData = serializer.fromJson(request.body(), JoinGameData.class);
+            this.gameService.joinGame(authToken, joinGameData);
+            return "";
+        } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {
                 response.status(401);
             } else if (e.getMessage().equals("Error: bad request")) {
@@ -95,6 +88,6 @@ public class GameResource {
             }
             return e.getMessage();
         }
-        }
+    }
 
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
     private final Map<Integer, GameData> gameDB;
+     private int id  = 0;
     public MemoryGameDAO() {
         this.gameDB = new HashMap<>();
     }
@@ -21,23 +22,38 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameListData listGames() {
-        return null;
+        var gamesList = new GameListData(new ArrayList<>());
+        for (int gameID : gameDB.keySet()){
+            var gameData = gameDB.get(gameID);
+            gamesList.games().add(gameData);
+        }
+       return gamesList;
     }
 
     @Override
-    public int createGame(String gameName, GameData gameData) {
-        return 0;
+    public int createGame(String gameName) throws DataAccessException {
+        if(gameName == null || gameName.isBlank()){
+            throw new DataAccessException("Error: bad request");
+        }
+        id++;
+        gameDB.put(id, new GameData(id, null, null, gameName, null));
+        return id;
     }
 
-    @Override
-    public void joinGame(String authToken, JoinGameData gameData) {
-    }
 
     @Override
-    public GameData getGame(int gameID) {
+    public GameData getGame(int gameID) throws DataAccessException {
         if (gameDB.containsKey(gameID)){
             return this.gameDB.get(gameID);
         }
-        return null;
+        throw new DataAccessException("Error: bad request");
+    }
+    public void updateGame(GameData gameData) throws DataAccessException{
+        if (gameDB.containsKey(gameData.gameID())){
+            gameDB.put(gameData.gameID(), gameData);
+        }
+        else {
+            throw new DataAccessException("Error: bad request");
+        }
     }
 }

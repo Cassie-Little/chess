@@ -8,11 +8,11 @@ public interface GameDAO {
     void clear();
     GameListData listGames();
 
-    int createGame(String gameName, GameData gameData);
+    int createGame(String gameName) throws DataAccessException;
 
-    void joinGame(String authToken, JoinGameData gameData);
+    void updateGame(GameData gameData) throws DataAccessException;
 
-    GameData getGame(int gameID);
+    GameData getGame(int gameID) throws DataAccessException;
 
 }
 
