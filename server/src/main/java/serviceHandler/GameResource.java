@@ -47,7 +47,7 @@ public class GameResource {
             } else {
                 response.status(500);
             }
-            return e.getMessage();
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 
@@ -65,7 +65,7 @@ public class GameResource {
             } else {
                 response.status(500);
             }
-            return e.getMessage();
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 
@@ -86,7 +86,7 @@ public class GameResource {
             } else {
                 response.status(500);
             }
-            return e.getMessage();
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 

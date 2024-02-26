@@ -35,7 +35,7 @@ public class SessionResource {
             else {
                 response.status(500);
             }
-            return e.getMessage();
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 
@@ -51,7 +51,7 @@ public class SessionResource {
             }else {
                 response.status(500);
             }
-            return e.getMessage();
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 }

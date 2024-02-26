@@ -49,6 +49,9 @@ public class GameService {
             var gameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
             gameDAO.updateGame(gameData);
         }
+        else if (joinGameData.playerColor().equals("")){
+
+        }
         else {
             throw new DataAccessException("Error: bad request");
         }

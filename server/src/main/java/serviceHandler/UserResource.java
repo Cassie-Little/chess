@@ -33,7 +33,7 @@ public class UserResource {
             } else {
                 response.status(500);
             }
-            return e.getMessage();
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
         }
     }
 }
