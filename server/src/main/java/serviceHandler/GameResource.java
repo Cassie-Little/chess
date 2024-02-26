@@ -3,6 +3,7 @@ package serviceHandler;
 import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
+import model.CreateGameResponse;
 import model.GameData;
 import model.JoinGameData;
 import service.GameService;
@@ -56,7 +57,7 @@ public class GameResource {
             var authToken = request.headers("authorization");
             var inputGameData = serializer.fromJson(request.body(), GameData.class);
             var gameData = this.gameService.createGame(authToken, inputGameData);
-            return serializer.toJson(gameData);
+            return serializer.toJson( new CreateGameResponse(gameData));
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {
                 response.status(401);

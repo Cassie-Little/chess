@@ -35,7 +35,11 @@ public class GameService {
     public void joinGame( String authToken, JoinGameData joinGameData)  throws DataAccessException{
         var username= authDAO.getUsername(authToken);
         var game = this.gameDAO.getGame(joinGameData.gameID());
-        if (joinGameData.playerColor().equals("WHITE")) {
+        if (joinGameData.playerColor() == null){
+            joinAsWatcher();
+            return;
+        }
+        else if (joinGameData.playerColor().equals("WHITE")) {
             if (game.whiteUsername() != null){
                 throw  new DataAccessException("Error: already taken");
             }
@@ -49,12 +53,12 @@ public class GameService {
             var gameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
             gameDAO.updateGame(gameData);
         }
-        else if (joinGameData.playerColor().equals("")){
-
-        }
         else {
             throw new DataAccessException("Error: bad request");
         }
+    }
+    public void joinAsWatcher(){
+
     }
 
 }
