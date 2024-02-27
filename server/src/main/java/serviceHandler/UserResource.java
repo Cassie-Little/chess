@@ -11,20 +11,22 @@ import spark.Spark;
 public class UserResource {
     final UserService userService;
     final Gson serializer;
-    public UserResource(UserService userService, Gson serializer){
+
+    public UserResource(UserService userService, Gson serializer) {
         this.userService = userService;
         this.serializer = serializer;
     }
-    public void registerRoutes(){
+
+    public void registerRoutes() {
         Spark.post("/user", this::registerRequest);
     }
-    private String registerRequest(Request request, Response response){
+
+    private String registerRequest(Request request, Response response) {
         try {
             var userData = serializer.fromJson(request.body(), UserData.class);
             var authData = this.userService.register(userData);
             return serializer.toJson(authData);
-        }
-        catch (DataAccessException e){
+        } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: bad request")) {
                 response.status(400);
 

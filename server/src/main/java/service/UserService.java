@@ -10,10 +10,11 @@ public class UserService {
     private final UserDAO userDAO;
     private final AuthDAO authDAO;
 
-    public UserService(UserDAO userDAO, AuthDAO authDAO){
+    public UserService(UserDAO userDAO, AuthDAO authDAO) {
         this.userDAO = userDAO;
         this.authDAO = authDAO;
     }
+
     public AuthData register(UserData userData) throws DataAccessException {
         userDAO.createUser(userData);
         var authToken = authDAO.createAuth(userData.username());

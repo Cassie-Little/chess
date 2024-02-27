@@ -12,7 +12,6 @@ import spark.Response;
 import spark.Spark;
 
 public class GameResource {
-    //final GameDAO gameDAO;
     final Gson serializer;
     final GameService gameService;
     final AuthDAO authDAO;
@@ -57,7 +56,7 @@ public class GameResource {
             var authToken = request.headers("authorization");
             var inputGameData = serializer.fromJson(request.body(), GameData.class);
             var gameData = this.gameService.createGame(authToken, inputGameData);
-            return serializer.toJson( new CreateGameResponse(gameData));
+            return serializer.toJson(new CreateGameResponse(gameData));
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {
                 response.status(401);
