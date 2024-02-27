@@ -45,40 +45,31 @@ public class PawnMoves {
         if (ChessPiece.isInbounds(endPosition.getRow(), endPosition.getColumn())) {
             ChessPiece piece = board.getPiece(endPosition);
             if (piece == null && !isDiag) {
-                if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-                }
-                else if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-
-                } else {
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, null));
-                }
+                addPromoMoves(myPosition, endPosition, myPiece, possibleMoves);
             } else if (piece != null && isDiag && piece.getTeamColor() != myPiece.getTeamColor()) {
-                if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-                }
-                else if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
-
-                } else {
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, null));
-                }
+                addPromoMoves(myPosition, endPosition, myPiece, possibleMoves);
             }
         }
 
+    }
+
+    private void addPromoMoves(ChessPosition myPosition, ChessPosition endPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
+        if (myPiece.getTeamColor() == ChessGame.TeamColor.WHITE && endPosition.getRow() == 8) {
+            addPromoMoves(myPosition, endPosition, possibleMoves);
+        }
+        else if (myPiece.getTeamColor() == ChessGame.TeamColor.BLACK && endPosition.getRow() == 1) {
+            addPromoMoves(myPosition, endPosition, possibleMoves);
+
+        } else {
+            possibleMoves.add(new ChessMove(myPosition, endPosition, null));
+        }
+    }
+
+    private void addPromoMoves(ChessPosition myPosition, ChessPosition endPosition, Collection<ChessMove> possibleMoves) {
+        possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.QUEEN));
+        possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.BISHOP));
+        possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.ROOK));
+        possibleMoves.add(new ChessMove(myPosition, endPosition, ChessPiece.PieceType.KNIGHT));
     }
 }
 
