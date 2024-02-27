@@ -26,7 +26,7 @@ public class KnightMoves {
             tempRow += 1;
             tempCol = tempCol - 2;
             ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-            if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
+            if (!SimplePieceMoves.addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                 break;
             }
             index ++;
@@ -41,7 +41,7 @@ public class KnightMoves {
                 tempRow += 2;
                 tempCol -= 1;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                     break;
                 }
                 index ++;
@@ -55,7 +55,7 @@ public class KnightMoves {
                 tempRow += 2;
                 tempCol += 1;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                     break;
                 }
                 index ++;
@@ -69,7 +69,7 @@ public class KnightMoves {
                 tempRow += 1;
                 tempCol = tempCol + 2;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition, endPosition, myPiece, possibleMoves)) {
                     break;
                 }
                 index ++;
@@ -83,7 +83,7 @@ public class KnightMoves {
                 tempRow -= 1;
                 tempCol = tempCol - 2;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
                     break;
                 }
                 index++;
@@ -97,7 +97,7 @@ public class KnightMoves {
                 tempRow -= 2;
                 tempCol -= 1;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
                     break;
                 }
                 index++;
@@ -111,7 +111,7 @@ public class KnightMoves {
                 tempRow -= 2;
                 tempCol += 1;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
                     break;
                 }
                 index++;
@@ -125,27 +125,12 @@ public class KnightMoves {
                 tempRow -= 1;
                 tempCol = tempCol + 2;
                 ChessPosition endPosition = new ChessPosition(tempRow, tempCol);
-                if (!addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
+                if (!SimplePieceMoves.addIfValidMove(board, myPosition,endPosition, myPiece, possibleMoves)){
                     break;
                 }
                 index++;
             }
         }
-    private boolean addIfValidMove(ChessBoard board, ChessPosition myPosition, ChessPosition endPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
-        if (ChessPiece.isInbounds(endPosition.getRow(), endPosition.getColumn())) {
-            ChessPiece piece = board.getPiece(endPosition);
-            if (piece == null) {
-                possibleMoves.add(new ChessMove(myPosition, endPosition, null ));
-                return true;
-            }
-            else {
-                if (piece.getTeamColor() != myPiece.getTeamColor()){
-                    possibleMoves.add(new ChessMove(myPosition, endPosition, null ));
-                }
-                return false;
-            }
-        }
-        return false;
-    }
+
 
 }
