@@ -85,10 +85,10 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
        return switch(type){
-            case BISHOP -> new BishopMoves().bishopPieceMoves(board, myPosition, this);
-            case ROOK -> new RookMoves().rookPieceMoves(board,myPosition, this);
+            case BISHOP -> new SimplePieceMoves().bishopPieceMoves(board, myPosition, this);
+            case ROOK -> new SimplePieceMoves().rookPieceMoves(board,myPosition, this);
             case KNIGHT -> new KnightMoves().knightPieceMoves(board, myPosition, this);
-            case QUEEN -> new QueenMoves().queenPieceMoves(board, myPosition, this);
+            case QUEEN -> new SimplePieceMoves().queenPieceMoves(board, myPosition, this);
             case KING -> new KingMoves().kingPieceMoves(board, myPosition, this);
             case PAWN -> new PawnMoves().pawnPieceMoves(board, myPosition, this);
             default -> throw new RuntimeException( type + " not implemented");

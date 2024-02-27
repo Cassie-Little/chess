@@ -1,8 +1,39 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashSet;
 
-public class MoveTypes {
+public class SimplePieceMoves {
+    public SimplePieceMoves() {
+    }
+    public Collection<ChessMove> queenPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
+        HashSet<ChessMove> listOfMoves = new HashSet<>();
+        moveUp(board, myPosition, myPiece, listOfMoves);
+        moveDown(board, myPosition, myPiece, listOfMoves);
+        moveRight(board, myPosition, myPiece, listOfMoves);
+        moveLeft(board, myPosition, myPiece, listOfMoves);
+        diagUpLeft(board, myPosition, myPiece, listOfMoves);
+        diagUpRight(board, myPosition, myPiece, listOfMoves);
+        diagDownRight(board, myPosition, myPiece, listOfMoves);
+        diagDownLeft(board, myPosition, myPiece, listOfMoves);
+        return listOfMoves;
+    }
+    public Collection<ChessMove> bishopPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
+        HashSet<ChessMove> listOfMoves = new HashSet<>();
+        diagUpRight(board, myPosition, myPiece, listOfMoves);
+        diagDownLeft(board, myPosition, myPiece, listOfMoves);
+        diagDownRight(board, myPosition, myPiece, listOfMoves);
+        diagUpLeft(board, myPosition, myPiece, listOfMoves);
+        return listOfMoves;
+    }
+    public Collection<ChessMove> rookPieceMoves(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece) {
+        HashSet<ChessMove> listOfMoves = new HashSet<>();
+        moveUp(board, myPosition, myPiece, listOfMoves);
+        moveDown(board, myPosition, myPiece, listOfMoves);
+        moveRight(board, myPosition, myPiece, listOfMoves);
+        moveLeft(board, myPosition, myPiece, listOfMoves);
+        return listOfMoves;
+    }
     public static void diagUpRight(ChessBoard board, ChessPosition myPosition, ChessPiece myPiece, Collection<ChessMove> possibleMoves) {
         int tempCol = myPosition.getColumn();
         int tempRow = myPosition.getRow();
@@ -111,4 +142,6 @@ public class MoveTypes {
         }
         return false;
     }
+
+
 }

@@ -73,11 +73,6 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         var piece = board.getPiece(move.getStartPosition());
-//       if (piece.getTeamColor() != teamTurn || isInCheck(piece.getTeamColor())
-//               || isInStalemate(piece.getTeamColor()) || isInCheckmate(piece.getTeamColor())
-//               || !validMoves(move.getStartPosition()).contains(move)) {
-//                throw new InvalidMoveException("Invalid Move.");
-//       }
         if (piece.getTeamColor() != teamTurn) {
             throw new InvalidMoveException("Not your team");
         } else if (isInStalemate(teamTurn)) {
@@ -89,7 +84,7 @@ public class ChessGame {
         } else {
             board.chessMove(move);
             var promo = move.getPromotionPiece();
-            if (promo != null){
+            if (promo != null) {
                 piece.setPieceType(promo);
             }
             if (piece.getTeamColor() == TeamColor.WHITE) {
@@ -177,7 +172,7 @@ public class ChessGame {
                 }
             }
         }
-        if (!isInCheck(teamColor) && doesTeamHaveAMove == false){
+        if (!isInCheck(teamColor) && !doesTeamHaveAMove) {
             return true;
         }
         return false;
