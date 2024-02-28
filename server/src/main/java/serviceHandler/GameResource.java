@@ -1,7 +1,6 @@
 package serviceHandler;
 
 import com.google.gson.Gson;
-import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import model.CreateGameResponse;
 import model.GameData;
@@ -14,13 +13,12 @@ import spark.Spark;
 public class GameResource {
     final Gson serializer;
     final GameService gameService;
-    final AuthDAO authDAO;
 
 
-    public GameResource(GameService gameService, Gson serializer, AuthDAO authDAO) {
+    public GameResource(GameService gameService, Gson serializer) {
         this.serializer = serializer;
         this.gameService = gameService;
-        this.authDAO = authDAO;
+
     }
 
     public void registerRoutes() {

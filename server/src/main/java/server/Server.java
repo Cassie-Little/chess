@@ -27,7 +27,7 @@ public class Server {
         var gson = new Gson();
         new UserResource(new UserService(userDAO, authDAO), gson).registerRoutes();
         new SessionResource(new SessionService(userDAO, authDAO), gson).registerRoutes();
-        new GameResource(new GameService(gameDAO, userDAO, authDAO), gson, authDAO).registerRoutes();
+        new GameResource(new GameService(gameDAO, userDAO, authDAO), gson ).registerRoutes();
         Spark.awaitInitialization();
         return Spark.port();
     }
