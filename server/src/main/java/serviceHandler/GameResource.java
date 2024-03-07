@@ -29,7 +29,7 @@ public class GameResource {
     }
 
 
-    private String clearRequest(Request request, Response response) {
+    private String clearRequest(Request request, Response response) throws DataAccessException {
         this.gameService.clear();
         return "";
     }

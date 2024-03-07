@@ -5,6 +5,7 @@ import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class SessionService {
     private final UserDAO userDAO;
@@ -19,7 +20,8 @@ public class SessionService {
     public AuthData login(UserData loginData) throws DataAccessException {
         try {
             var userData = userDAO.getUser(loginData.username());
-            if (!userData.password().equals(loginData.password())) {
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if (!encoder.matches(loginData.password(), userData.password())){
                 throw new DataAccessException("Error: unauthorized");
             }
             var authToken = authDAO.createAuth(userData.username());

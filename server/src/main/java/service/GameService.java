@@ -19,7 +19,7 @@ public class GameService {
         this.userDAO = userDAO;
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         this.gameDAO.clear();
         this.authDAO.clear();
         this.userDAO.clear();
