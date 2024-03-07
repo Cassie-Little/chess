@@ -5,6 +5,7 @@ import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
 import model.AuthData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class UserService {
     private final UserDAO userDAO;
@@ -19,6 +20,11 @@ public class UserService {
         userDAO.createUser(userData);
         var authToken = authDAO.createAuth(userData.username());
         return new AuthData(authToken, userData.username());
+    }
+    public String hashPassword(UserData userData) {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hash = encoder.(userData.password());
+        return hash;
     }
 
 }

@@ -2,10 +2,11 @@ package dataAccess;
 
 import model.GameData;
 import model.GameListData;
-import model.JoinGameData;
+
+import java.sql.Connection;
 
 public interface GameDAO {
-    void clear();
+    //void clear();
     GameListData listGames();
 
     int createGame(String gameName) throws DataAccessException;
@@ -14,5 +15,6 @@ public interface GameDAO {
 
     GameData getGame(int gameID) throws DataAccessException;
 
+    void clear(Connection conn);
 }
 

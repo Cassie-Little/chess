@@ -1,6 +1,9 @@
 package dataAccess;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -46,6 +49,49 @@ public class DatabaseManager {
         }
     }
 
+    static void createUserTable() throws DataAccessException {
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password);
+             Statement stmt = conn.createStatement();) {
+            String userTable = "CREATE TABLE userData " +
+                    " username varchar(30), " +
+                    " password varchar(60), " +
+                    " email varchar(30)";
+            stmt.executeUpdate(userTable);
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    static void createAuthTable() throws DataAccessException {
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password);
+             Statement stmt = conn.createStatement();) {
+
+            String authTable = "CREATE TABLE authData " +
+                    " authToken varchar(60), " +
+                    " username varchar(30)";
+            stmt.executeUpdate(authTable);
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    static void createGameTable() throws DataAccessException {
+        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password);
+             Statement stmt = conn.createStatement();) {
+            String gameTable = "CREATE TABLE gameData " +
+                    "gameID integer not null," +
+                    " whiteUsername varchar(30), " +
+                    " blackUsername varchar(30), " +
+                    " gameName varchar(30)," +
+                    "game varchar(200)";
+            stmt.executeUpdate(gameTable);
+
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should
@@ -67,4 +113,5 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
     }
+
 }
