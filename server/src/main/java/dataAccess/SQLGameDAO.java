@@ -15,8 +15,8 @@ public class SQLGameDAO implements GameDAO {
             CREATE TABLE IF NOT EXISTS  gameData (
               `id` int NOT NULL AUTO_INCREMENT,
               `json` TEXT DEFAULT NULL,
-              PRIMARY KEY (`id`),
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+              PRIMARY KEY (`id`)
+            );
             """
         };
         DatabaseManager.configureDatabase(createStatements);
@@ -57,6 +57,9 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
+        if (gameName == null || gameName.isBlank()) {
+            throw new DataAccessException("Error: bad request");
+        }
         var json = new Gson().toJson(new GameData(0, null, null, gameName, null));
         var statement = "INSERT INTO gameData (id, json) VALUES(?, ?)";
         var id = DatabaseManager.executeUpdate(statement, json);
@@ -65,9 +68,13 @@ public class SQLGameDAO implements GameDAO {
 
     @Override
     public void updateGame(GameData gameData) throws DataAccessException {
-        var json = new Gson().toJson(gameData);
-        var statement = "UPDATE gameData SET json = ? WHERE id = ?";
-        DatabaseManager.executeUpdate(statement, json, gameData.gameID());
+        var check = "SELECT 1 FROM gameData IF EXISTS WHERE id = ?";
+        if (DatabaseManager.executeUpdate(check) == 1) {
+            var json = new Gson().toJson(gameData);
+            var statement = "UPDATE gameData SET json = ? WHERE id = ?";
+            DatabaseManager.executeUpdate(statement, json, gameData.gameID());
+        }
+        throw new DataAccessException("Error: bad request");
     }
 
     @Override

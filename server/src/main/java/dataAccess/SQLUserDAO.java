@@ -16,7 +16,7 @@ public class SQLUserDAO implements UserDAO{
               `email` varchar (30),
               PRIMARY KEY (`id`),
               INDEX(username)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            );
             """
         };
         DatabaseManager.configureDatabase(createStatements);
@@ -26,7 +26,21 @@ public class SQLUserDAO implements UserDAO{
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?)";
+        if (
+                userData.username() == null || userData.username().isBlank() ||
+                        userData.password() == null || userData.password().isBlank() ||
+                        userData.email() == null || userData.email().isBlank()) {
+            throw new DataAccessException("Error: bad request");
+        }
+        try {
+            getUser(userData.username());
+            throw new DataAccessException("Error: already taken");
+        }
+        catch(DataAccessException ignored) {
+
+        }
         var id = DatabaseManager.executeUpdate(statement, userData.username(), userData.password(), userData.email());
+
     }
     private UserData readUser(ResultSet rs) throws SQLException {
         var id = rs.getInt("id");
@@ -56,7 +70,7 @@ public class SQLUserDAO implements UserDAO{
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE authData";
+        var statement = "TRUNCATE userData";
         DatabaseManager.executeUpdate(statement);
     }
 }

@@ -12,7 +12,7 @@ public class SQLAuthDAO implements AuthDAO{
               `username` varchar(30),
               PRIMARY KEY (`id`),
               INDEX(authToken)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            );
             """
         };
         DatabaseManager.configureDatabase(createStatements);
