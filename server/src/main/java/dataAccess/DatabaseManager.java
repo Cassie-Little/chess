@@ -3,8 +3,10 @@ package dataAccess;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
+
+import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import static java.sql.Types.NULL;
 
 public class DatabaseManager {
     private static final String databaseName;
@@ -49,48 +51,6 @@ public class DatabaseManager {
         }
     }
 
-    static void createUserTable() throws DataAccessException {
-        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password);
-             Statement stmt = conn.createStatement();) {
-            String userTable = "CREATE TABLE userData " +
-                    " username varchar(30), " +
-                    " password varchar(60), " +
-                    " email varchar(30)";
-            stmt.executeUpdate(userTable);
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-    }
-
-    static void createAuthTable() throws DataAccessException {
-        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password);
-             Statement stmt = conn.createStatement();) {
-
-            String authTable = "CREATE TABLE authData " +
-                    " authToken varchar(60), " +
-                    " username varchar(30)";
-            stmt.executeUpdate(authTable);
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-    }
-
-    static void createGameTable() throws DataAccessException {
-        try (Connection conn = DriverManager.getConnection(connectionUrl, user, password);
-             Statement stmt = conn.createStatement();) {
-            String gameTable = "CREATE TABLE gameData " +
-                    "gameID integer not null," +
-                    " whiteUsername varchar(30), " +
-                    " blackUsername varchar(30), " +
-                    " gameName varchar(30)," +
-                    "game varchar(200)";
-            stmt.executeUpdate(gameTable);
-
-        } catch (SQLException e) {
-            throw new DataAccessException(e.getMessage());
-        }
-    }
-
 
     /**
      * Create a connection to the database and sets the catalog based upon the
@@ -113,5 +73,39 @@ public class DatabaseManager {
             throw new DataAccessException(e.getMessage());
         }
     }
+    static int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
 
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
+    }
+
+    static void configureDatabase(String[] createStatements) throws DataAccessException {
+        DatabaseManager.createDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+            for (var statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
 }

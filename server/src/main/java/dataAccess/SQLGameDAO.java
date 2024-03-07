@@ -1,68 +1,92 @@
-package dataAccess;import com.google.gson.Gson;
+package dataAccess;
+
+import com.google.gson.Gson;
 import model.GameData;
 import model.GameListData;
 
-import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import static dataAccess.DatabaseManager.createGameTable;
-import static dataAccess.DatabaseManager.createDatabase;
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
+import java.util.ArrayList;
 
 public class SQLGameDAO implements GameDAO {
     public SQLGameDAO() throws DataAccessException {
-        createDatabase();
-        createGameTable();
-    }
-
-    public int insertData(Connection conn, GameData gameData) throws SQLException {
-        try (var preparedStatement = conn.prepareStatement("INSERT INTO gameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES(?, ?, ?, ?, ?)", RETURN_GENERATED_KEYS)) {
-            preparedStatement.setInt(1, gameData.gameID());
-            preparedStatement.setString(2, gameData.whiteUsername());
-            preparedStatement.setString(3, gameData.blackUsername());
-            preparedStatement.setString(4, gameData.gameName());
-            var game = new Gson().toJson(gameData.game());
-            preparedStatement.setString(5, game);
-
-            preparedStatement.executeUpdate();
-
-            var resultSet = preparedStatement.getGeneratedKeys();
-            var ID = 0;
-            if (resultSet.next()) {
-                ID = resultSet.getInt(1);
-            }
-
-            return ID;
-        }
+        String[] createStatements = {
+                """
+            CREATE TABLE IF NOT EXISTS  gameData (
+              `id` int NOT NULL AUTO_INCREMENT,
+              `json` TEXT DEFAULT NULL,
+              PRIMARY KEY (`id`),
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+        };
+        DatabaseManager.configureDatabase(createStatements);
     }
 
     @Override
-    public void clear(Connection conn) {
-        try (var preparedStatement = conn.prepareStatement("DELETE FROM GameData")) {
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public void clear() throws DataAccessException {
+        var statement = "TRUNCATE gameData";
+        DatabaseManager.executeUpdate(statement);
     }
+
+
+    @Override
+    public GameListData listGames() throws DataAccessException {
+        var result = new GameListData(new ArrayList<GameData>());
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, json FROM gameData";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.games().add(readGame(rs));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return result;
+    }
+    private GameData readGame(ResultSet rs) throws SQLException {
+        var id = rs.getInt("id");
+        var json = rs.getString("json");
+        var gameData = new Gson().fromJson(json, GameData.class);
+        return new GameData(id, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+    }
+
+
+
+    @Override
+    public int createGame(String gameName) throws DataAccessException {
+        var json = new Gson().toJson(new GameData(0, null, null, gameName, null));
+        var statement = "INSERT INTO gameData (id, json) VALUES(?, ?)";
+        var id = DatabaseManager.executeUpdate(statement, json);
+        return id;
+    }
+
+    @Override
+    public void updateGame(GameData gameData) throws DataAccessException {
+        var json = new Gson().toJson(gameData);
+        var statement = "UPDATE gameData SET json = ? WHERE id = ?";
+        DatabaseManager.executeUpdate(statement, json, gameData.gameID());
+    }
+
+    @Override
+    public GameData getGame(int gameID) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, json FROM gameData WHERE id = ?";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                         return readGame(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        throw new DataAccessException("Error: bad request");
+    }
+
+
 }
 
-@Override
-public GameListData listGames() {
-    return null;
-}
-
-@Override
-public int createGame(String gameName) throws DataAccessException {
-    return 0;
-}
-
-@Override
-public void updateGame(GameData gameData) throws DataAccessException {
-
-}
-
-@Override
-public GameData getGame(int gameID) throws DataAccessException {
-    return null;
-}
-}
