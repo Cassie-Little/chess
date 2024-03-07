@@ -17,14 +17,15 @@ public class UserService {
     }
 
     public AuthData register(UserData userData) throws DataAccessException {
-        userDAO.createUser(userData);
-        var authToken = authDAO.createAuth(userData.username());
-        return new AuthData(authToken, userData.username());
+        var newUserData = hashPassword(userData);
+        userDAO.createUser(newUserData);
+        var authToken = authDAO.createAuth(newUserData.username());
+        return new AuthData(authToken, newUserData.username());
     }
-    public String hashPassword(UserData userData) {
+    private UserData hashPassword(UserData userData) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hash = encoder.(userData.password());
-        return hash;
+        String hash = encoder.encode(userData.password());
+        return new UserData(userData.username(), hash, userData.email());
     }
 
 }

@@ -5,14 +5,14 @@ import model.GameListData;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import static dataAccess.DatabaseManager.createAuthTable;
+import static dataAccess.DatabaseManager.createGameTable;
 import static dataAccess.DatabaseManager.createDatabase;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 
 public class SQLGameDAO implements GameDAO {
     public SQLGameDAO() throws DataAccessException {
         createDatabase();
-        createAuthTable();
+        createGameTable();
     }
 
     public int insertData(Connection conn, GameData gameData) throws SQLException {

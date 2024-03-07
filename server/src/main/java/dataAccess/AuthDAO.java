@@ -1,20 +1,13 @@
 package dataAccess;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 public interface AuthDAO {
-//public String createAuth(String username);
-//public  String getUsername(String authToken) throws DataAccessException;
-//public void deleteAuth(String authToken);
+    String createAuth(String username) throws DataAccessException;
 
-    String createAuth(Connection conn, String username) throws SQLException;
+    String getUsername(String authToken) throws DataAccessException;
 
-    String getUsername(Connection conn, String authToken) throws DataAccessException, SQLException;
+    void deleteAuth(String authToken) throws DataAccessException;
 
-    void deleteAuth(Connection conn, String authToken) throws SQLException;
+    void clear() throws DataAccessException;
 
-    //void clear();
 
-    void clear(Connection conn);
 }
