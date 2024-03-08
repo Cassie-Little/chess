@@ -27,6 +27,7 @@ public class JoinGameTests {
         Assertions.assertNotNull(updatedGameData);
         Assertions.assertEquals("a", updatedGameData.whiteUsername());
     }
+
     @Test
     public void negativeJoinGame() throws DataAccessException {
         GameDAO gameDAO = new MemoryGameDAO();
@@ -40,7 +41,11 @@ public class JoinGameTests {
         var gameID = gameService.createGame(authData.authToken(), gameData);
         JoinGameData joinGameData = new JoinGameData("pookie", gameID);
         String fakeAuth = "gotcha!";
-        Assertions.assertThrows(DataAccessException.class, ()->{gameService.joinGame( authData.authToken(), joinGameData );});
-        Assertions.assertThrows(DataAccessException.class, ()->{gameService.joinGame( fakeAuth, joinGameData );});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameService.joinGame(authData.authToken(), joinGameData);
+        });
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameService.joinGame(fakeAuth, joinGameData);
+        });
     }
 }

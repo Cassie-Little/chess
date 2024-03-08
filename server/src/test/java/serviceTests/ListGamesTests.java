@@ -23,6 +23,7 @@ public class ListGamesTests {
         var games = gameService.listGames(authData.authToken());
         Assertions.assertEquals(1, games.games().size());
     }
+
     @Test
     public void negativeListGames() throws DataAccessException {
         GameDAO gameDAO = new MemoryGameDAO();
@@ -37,7 +38,9 @@ public class ListGamesTests {
         gameService.createGame(authToken, gameData);
         authToken = "urMom";
         String finalAuthToken = authToken;
-        Assertions.assertThrows(DataAccessException.class, ()->{gameService.listGames(finalAuthToken);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameService.listGames(finalAuthToken);
+        });
 
     }
 

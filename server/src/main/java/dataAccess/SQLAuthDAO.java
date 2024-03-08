@@ -2,8 +2,8 @@ package dataAccess;
 
 import java.util.UUID;
 
-public class SQLAuthDAO implements AuthDAO{
-    public  SQLAuthDAO() throws DataAccessException {
+public class SQLAuthDAO implements AuthDAO {
+    public SQLAuthDAO() throws DataAccessException {
         String[] createStatements = {
                 """
             CREATE TABLE IF NOT EXISTS  authData (
@@ -27,11 +27,11 @@ public class SQLAuthDAO implements AuthDAO{
     }
 
     @Override
-    public String getUsername( String authToken) throws DataAccessException {
+    public String getUsername(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT username FROM authData WHERE authToken=?";
             try (var ps = conn.prepareStatement(statement)) {
-                ps.setString(1, authToken );
+                ps.setString(1, authToken);
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
                         return rs.getString("username");
@@ -45,7 +45,7 @@ public class SQLAuthDAO implements AuthDAO{
     }
 
     @Override
-    public void deleteAuth( String authToken) throws DataAccessException {
+    public void deleteAuth(String authToken) throws DataAccessException {
         var statement = "DELETE FROM authData WHERE authToken=?";
         DatabaseManager.executeUpdate(statement, authToken);
     }

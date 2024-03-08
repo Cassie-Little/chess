@@ -5,7 +5,7 @@ import model.UserData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class SQLUserDAO implements UserDAO{
+public class SQLUserDAO implements UserDAO {
     public SQLUserDAO() throws DataAccessException {
         String[] createStatements = {
                 """
@@ -37,7 +37,7 @@ public class SQLUserDAO implements UserDAO{
         var username = rs.getString("username");
         var password = rs.getString("password");
         var email = rs.getString("email");
-        return new UserData(username, password, email );
+        return new UserData(username, password, email);
     }
 
     @Override
@@ -48,11 +48,12 @@ public class SQLUserDAO implements UserDAO{
         }
         return userData;
     }
-    private UserData getUserDataOrDefault(String username) throws DataAccessException{
+
+    private UserData getUserDataOrDefault(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM userData WHERE username=?";
             try (var ps = conn.prepareStatement(statement)) {
-                ps.setString(1, username );
+                ps.setString(1, username);
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
                         return readUser(rs);

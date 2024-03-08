@@ -13,8 +13,11 @@ public class RegisterTests {
         AuthDAO authDAO = new MemoryAuthDAO();
         UserData userData = new UserData(null, "a", "a");
         UserService userService = new UserService(userDAO, authDAO);
-        Assertions.assertThrows(DataAccessException.class, ()->{userService.register(userData);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            userService.register(userData);
+        });
     }
+
     @Test
     public void positiveRegisterTest() throws DataAccessException {
         UserDAO userDAO = new MemoryUserDAO();

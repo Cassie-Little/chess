@@ -20,7 +20,9 @@ public class SQLGameDAOTests {
     @Test
     public void createGameNegativeTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
-        Assertions.assertThrows(DataAccessException.class, ()->{gameDAO.createGame(null);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameDAO.createGame(null);
+        });
     }
 
     @Test
@@ -36,7 +38,9 @@ public class SQLGameDAOTests {
     public void getGameNegativeTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
         int gameID = -53;
-        Assertions.assertThrows(DataAccessException.class, ()->{gameDAO.getGame(gameID);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameDAO.getGame(gameID);
+        });
     }
 
     @Test
@@ -59,6 +63,7 @@ public class SQLGameDAOTests {
         var numWhitePawns = boardAfterUpdate.getPiecePositions(ChessPiece.PieceType.PAWN, ChessGame.TeamColor.WHITE).size();
         Assertions.assertEquals(8, numWhitePawns);
     }
+
     @Test
     public void updateGameNegativeTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
@@ -83,7 +88,9 @@ public class SQLGameDAOTests {
         gameDAO.updateGame(updatedGame);
         var gameDataAfterUpdate = gameDAO.getGame(gameID);
         gameDAO.clear();
-        Assertions.assertThrows(DataAccessException.class, ()->{gameDAO.getGame(gameID);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameDAO.getGame(gameID);
+        });
 
     }
 

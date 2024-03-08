@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 public class ClearTests {
     @Test
-    public void positiveClear() throws DataAccessException{
+    public void positiveClear() throws DataAccessException {
         GameDAO gameDAO = new MemoryGameDAO();
         UserDAO userDAO = new MemoryUserDAO();
         AuthDAO authDAO = new MemoryAuthDAO();
@@ -31,7 +31,11 @@ public class ClearTests {
         gameService.clear();
         games = gameDAO.listGames();
         Assertions.assertEquals(0, games.games().size());
-        Assertions.assertThrows(DataAccessException.class, ()->{authDAO.getUsername(authData.authToken());});
-        Assertions.assertThrows(DataAccessException.class, ()->{userDAO.getUser(username);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            authDAO.getUsername(authData.authToken());
+        });
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            userDAO.getUser(username);
+        });
     }
 }

@@ -20,8 +20,9 @@ public class CreateGameTests {
         UserService userService = new UserService(userDAO, authDAO);
         var authData = userService.register(userData);
         var game = gameService.createGame(authData.authToken(), gameData);
-        Assertions.assertEquals(gameDAO.getGame(game).gameName(), gameData.gameName() );
+        Assertions.assertEquals(gameDAO.getGame(game).gameName(), gameData.gameName());
     }
+
     @Test
     public void negativeCreateGames() throws DataAccessException {
         GameDAO gameDAO = new MemoryGameDAO();
@@ -32,6 +33,8 @@ public class CreateGameTests {
         GameService gameService = new GameService(gameDAO, userDAO, authDAO);
         UserService userService = new UserService(userDAO, authDAO);
         var authData = userService.register(userData);
-        Assertions.assertThrows(DataAccessException.class, ()->{gameService.createGame(authData.authToken(), gameData);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            gameService.createGame(authData.authToken(), gameData);
+        });
     }
 }

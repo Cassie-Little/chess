@@ -21,6 +21,7 @@ public class LoginTests {
         var loginData = sessionService.login(userData);
         Assertions.assertEquals(authData.username(), loginData.username());
     }
+
     @Test
     public void negativeLoginTests() throws DataAccessException {
         UserDAO userDAO = new MemoryUserDAO();
@@ -31,7 +32,9 @@ public class LoginTests {
         userService.register(userData);
         userData = new UserData("haha", "hehe", "hehe");
         UserData finalUserData = userData;
-        Assertions.assertThrows(DataAccessException.class, ()->{sessionService.login(finalUserData);});
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            sessionService.login(finalUserData);
+        });
     }
 
 }
