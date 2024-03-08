@@ -30,8 +30,8 @@ public class SQLUserDAO implements UserDAO{
             throw new DataAccessException("Error: already taken");
         }
         var id = DatabaseManager.executeUpdate(statement, userData.username(), userData.password(), userData.email());
-
     }
+
     private UserData readUser(ResultSet rs) throws SQLException {
         var id = rs.getInt("id");
         var username = rs.getString("username");

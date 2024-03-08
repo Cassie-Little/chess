@@ -59,4 +59,32 @@ public class SQLGameDAOTests {
         var numWhitePawns = boardAfterUpdate.getPiecePositions(ChessPiece.PieceType.PAWN, ChessGame.TeamColor.WHITE).size();
         Assertions.assertEquals(8, numWhitePawns);
     }
+    @Test
+    public void updateGameNegativeTest() throws DataAccessException {
+        var gameDAO = new SQLGameDAO();
+        var gameID = gameDAO.createGame("NEW GAME");
+        var gameData = gameDAO.getGame(gameID);
+        var updatedGame = new GameData(gameID, "bob", "george", "Invalid Game Name", new ChessGame()); // Invalid game name
+        gameDAO.updateGame(updatedGame);
+        var gameDataAfterUpdate = gameDAO.getGame(gameID);
+        Assertions.assertNotEquals(gameData, gameDataAfterUpdate);
+    }
+
+    @Test
+    public void clearTest() throws DataAccessException {
+        var gameDAO = new SQLGameDAO();
+        var gameID = gameDAO.createGame("NEW GAME");
+        var gameData = gameDAO.getGame(gameID);
+        var newGame = new ChessGame();
+        var board = new ChessBoard();
+        board.resetBoard();
+        newGame.setBoard(board);
+        var updatedGame = new GameData(gameID, "bob", "george", gameData.gameName(), newGame);
+        gameDAO.updateGame(updatedGame);
+        var gameDataAfterUpdate = gameDAO.getGame(gameID);
+        gameDAO.clear();
+        Assertions.assertThrows(DataAccessException.class, ()->{gameDAO.getGame(gameID);});
+
+    }
+
 }
