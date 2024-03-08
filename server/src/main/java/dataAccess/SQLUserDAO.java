@@ -26,18 +26,8 @@ public class SQLUserDAO implements UserDAO{
     @Override
     public void createUser(UserData userData) throws DataAccessException {
         var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?)";
-        if (
-                userData.username() == null || userData.username().isBlank() ||
-                        userData.password() == null || userData.password().isBlank() ||
-                        userData.email() == null || userData.email().isBlank()) {
-            throw new DataAccessException("Error: bad request");
-        }
-        try {
-            getUser(userData.username());
+        if (getUserDataOrDefault(userData.username()) != null) {
             throw new DataAccessException("Error: already taken");
-        }
-        catch(DataAccessException ignored) {
-
         }
         var id = DatabaseManager.executeUpdate(statement, userData.username(), userData.password(), userData.email());
 
@@ -52,6 +42,13 @@ public class SQLUserDAO implements UserDAO{
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        UserData userData = getUserDataOrDefault(username);
+        if (userData == null) {
+            throw new DataAccessException("Error: unknown username");
+        }
+        return userData;
+    }
+    private UserData getUserDataOrDefault(String username) throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT * FROM userData WHERE username=?";
             try (var ps = conn.prepareStatement(statement)) {
@@ -65,7 +62,7 @@ public class SQLUserDAO implements UserDAO{
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
-        throw new DataAccessException("Error: unknown username");
+        return null;
     }
 
     @Override

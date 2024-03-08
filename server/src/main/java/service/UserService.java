@@ -17,11 +17,18 @@ public class UserService {
     }
 
     public AuthData register(UserData userData) throws DataAccessException {
+        if (
+                userData.username() == null || userData.username().isBlank() ||
+                        userData.password() == null || userData.password().isBlank() ||
+                        userData.email() == null || userData.email().isBlank()) {
+            throw new DataAccessException("Error: bad request");
+        }
         var newUserData = hashPassword(userData);
         userDAO.createUser(newUserData);
         var authToken = authDAO.createAuth(newUserData.username());
         return new AuthData(authToken, newUserData.username());
     }
+
     private UserData hashPassword(UserData userData) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hash = encoder.encode(userData.password());

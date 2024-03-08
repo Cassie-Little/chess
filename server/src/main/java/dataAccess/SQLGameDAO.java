@@ -46,6 +46,7 @@ public class SQLGameDAO implements GameDAO {
         }
         return result;
     }
+
     private GameData readGame(ResultSet rs) throws SQLException {
         var id = rs.getInt("id");
         var json = rs.getString("json");
@@ -54,27 +55,29 @@ public class SQLGameDAO implements GameDAO {
     }
 
 
-
     @Override
     public int createGame(String gameName) throws DataAccessException {
         if (gameName == null || gameName.isBlank()) {
             throw new DataAccessException("Error: bad request");
         }
         var json = new Gson().toJson(new GameData(0, null, null, gameName, null));
-        var statement = "INSERT INTO gameData (id, json) VALUES(?, ?)";
+        var statement = "INSERT INTO gameData (json) VALUES(?)";
         var id = DatabaseManager.executeUpdate(statement, json);
         return id;
     }
 
     @Override
     public void updateGame(GameData gameData) throws DataAccessException {
-        var check = "SELECT 1 FROM gameData IF EXISTS WHERE id = ?";
-        if (DatabaseManager.executeUpdate(check) == 1) {
-            var json = new Gson().toJson(gameData);
-            var statement = "UPDATE gameData SET json = ? WHERE id = ?";
-            DatabaseManager.executeUpdate(statement, json, gameData.gameID());
+        try {
+            getGame(gameData.gameID());
+            throw new DataAccessException("Error: bad request");
+        } catch (DataAccessException ignored) {
+
         }
-        throw new DataAccessException("Error: bad request");
+        var json = new Gson().toJson(gameData);
+        var statement = "UPDATE gameData SET json = ? WHERE id = ?";
+        DatabaseManager.executeUpdate(statement, json, gameData.gameID());
+
     }
 
     @Override
@@ -82,9 +85,10 @@ public class SQLGameDAO implements GameDAO {
         try (var conn = DatabaseManager.getConnection()) {
             var statement = "SELECT id, json FROM gameData WHERE id = ?";
             try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
                     if (rs.next()) {
-                         return readGame(rs);
+                        return readGame(rs);
                     }
                 }
             }
