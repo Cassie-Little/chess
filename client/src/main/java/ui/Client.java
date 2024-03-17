@@ -1,13 +1,18 @@
 package ui;
 
+import exception.ResponseException;
+
 public class Client {
     private String player = null;
-   private final String serverURL;
+    private final String serverURL;
+    private ServerFacade serverFacade;
+    private State state = State.LOGGEDOUT;
 
-   public Client(String serverURL) {
-       this.serverURL = serverURL;
-   }
-    public String eval(String input) {
+    public Client(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
+    public static String eval(String input) {
         try {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -22,19 +27,43 @@ public class Client {
                 case "quit" -> "quit";
                 default -> help();
             };
-        } catch (ResponseException ex) {
+        } catch (exception.ResponseException ex) {
             return ex.getMessage();
         }
     }
-    public String login(String... params) throws ResponseException {
+
+    public String login(String... params) throws exception.ResponseException {
         if (params.length >= 1) {
-            state = State.SIGNEDIN;
-            visitorName = String.join("-", params);
-            ws = new WebSocketFacade(serverUrl, notificationHandler);
-            ws.enterPetShop(visitorName);
-            return String.format("You signed in as %s.", visitorName);
+            state = State.LOGGEDIN;
+            player = String.join("-", params);
+            serverFacade = new ServerFacade(serverURL);
+            //serverFacade.enterPetShop(player);
+            return String.format("You signed in as %s.", player);
         }
-        throw new ResponseException(400, "Expected: <yourname>");
+        throw new exception.ResponseException(400, "Expected: <yourname>");
+    }
+
+    public static String help() {
+        if (state == State.LOGGEDOUT) {
+            return """
+                    - login <yourname> <password>
+                    - quit
+                    """;
+        }
+        return """
+                - register
+                - login
+                - list_games
+                - create_games
+                - join_game
+                - logout
+                - quit
+                """;
+    }
+    private void assertLoggedIn() throws ResponseException {
+        if (state == State.LOGGEDOUT) {
+            throw new ResponseException(400, "Please sign in :)");
+        }
     }
 
 }
