@@ -2,6 +2,7 @@ package ui;
 
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 import java.util.Arrays;
@@ -61,7 +62,7 @@ public class Client {
     public String logout() throws ResponseException {
         if (state == State.LOGGEDIN) {
             state = State.LOGGEDOUT;
-            server.logout(authData);
+            server.logout();
             return String.format("You have logged out", authData.username());
         } else {
             throw new ResponseException(400, "You are not logged in");
@@ -69,29 +70,30 @@ public class Client {
     }
 
     public String listGames() throws ResponseException {
-        var gameList = server.listGames(authData);
+        var gameList = server.listGames();
         if (gameList.toString().isEmpty()) {
             return "Please create a game";
         } else {
             return gameList.toString();
         }
     }
+
     public String createGames(String... params) throws ResponseException {
-        if (params.length == 1){
-        int gameID = server.createGame(authData);
-        return String.format("you game ID is: ", gameID);
-    }
+        if (params.length == 1) {
+            var gameData = new GameData(0, null, null, params[0], null);
+            int gameID = server.createGame(gameData).gameID();
+            return String.format("you game ID is: ", gameID);
+        }
         throw new ResponseException(400, "Expected: <game_name>");
     }
 
-    public String joinGame(String... params) throws ResponseException{
+    public String joinGame(String... params) throws ResponseException {
         if (params.length == 2) {
-            var gameBoard = server.joinGame(authData);
+            var gameBoard = server.joinGame();
             return String.format("Your game" + gameBoard);
         }
         throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/observer)>");
     }
-
 
 
     public String help() {
