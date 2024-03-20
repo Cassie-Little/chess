@@ -2,6 +2,9 @@ package ui;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.AuthData;
+import model.GameListData;
+import model.UserData;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,18 +17,37 @@ import java.net.URL;
 public class ServerFacade {
     private final String serverUrl;
 
+
     public ServerFacade(String url) {
         serverUrl = url;
     }
-    public void clearResponse() throws ResponseException{
+
+    public void clear() throws ResponseException {
         var path = "/db";
         this.makeRequest("DELETE", path, null, null);
     }
 
-    public void registerRequest() throws ResponseException{
+    public AuthData register(UserData userData) throws ResponseException {
         var path = "/user";
-        // return this.makeRequest("POST", path, , .class);
+        return this.makeRequest("POST", path, userData , AuthData.class);
     }
+
+    public AuthData login(UserData userData) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST", path, userData, AuthData.class);
+    }
+
+    public void logout(AuthData authData) throws ResponseException {
+        var path = "/session";
+        this.makeRequest("DELETE", path, authData.authToken(), null);
+    }
+
+    public GameListData listGames(AuthData authData) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("GET", path, authData.authToken(), GameListData.class);
+    }
+
+
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
         try {
@@ -42,6 +64,7 @@ public class ServerFacade {
             throw new ResponseException(500, ex.getMessage());
         }
     }
+
     private static void writeBody(Object request, HttpURLConnection http) throws IOException {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
