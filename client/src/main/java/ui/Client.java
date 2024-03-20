@@ -26,7 +26,7 @@ public class Client {
                 case "register" -> register(params);
                 case "list_games" -> listGames();
                 case "logout" -> logout();
-                //case "joingame" -> adoptPet(params);
+                case "join_game" -> joinGame(params);
                 case "create_game" -> createGames(params);
                 case "quit" -> "quit";
                 default -> help();
@@ -84,6 +84,14 @@ public class Client {
         throw new ResponseException(400, "Expected: <game_name>");
     }
 
+    public String joinGame(String... params) throws ResponseException{
+        if (params.length == 2) {
+            var gameBoard = server.joinGame(authData);
+            return String.format("Your game" + gameBoard);
+        }
+        throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/observer)>");
+    }
+
 
 
     public String help() {
@@ -97,7 +105,7 @@ public class Client {
         return """
                 - list_games
                 - create_game <enter a name>
-                - join_game <enter black or white> <gameID>
+                - join_game <gameID> <enter black or white or observe>
                 - logout
                 - quit
                 """;

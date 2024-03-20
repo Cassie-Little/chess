@@ -52,6 +52,11 @@ public class ServerFacade {
         return this.makeRequest("POST", path, authData, int.class);
     }
 
+    public ChessBoardUI joinGame(AuthData authData) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("PUT", path, authData, ChessBoardUI.class);
+    }
+
 
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
