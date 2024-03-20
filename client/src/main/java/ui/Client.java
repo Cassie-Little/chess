@@ -11,6 +11,7 @@ public class Client {
     private ServerFacade server;
     private State state = State.LOGGEDOUT;
     private AuthData authData;
+
     public Client(String serverURL) {
         server = new ServerFacade(serverURL);
     }
@@ -26,7 +27,7 @@ public class Client {
                 case "list_games" -> listGames();
                 case "logout" -> logout();
                 //case "joingame" -> adoptPet(params);
-                //case "creategame" -> adoptAllPets();
+                case "create_game" -> createGames(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -40,20 +41,19 @@ public class Client {
             var userData = new UserData(params[0], params[1], null);
             authData = server.login(userData);
             state = State.LOGGEDIN;
-            return String.format("You signed in as %s.", params[0]);
+            return String.format("You signed in as %s. Press enter for more options \uD83D\uDC97", params[0]);
         }
         throw new exception.ResponseException(400, "Expected: <username> <password>");
     }
 
     public String register(String... params) throws ResponseException {
         state = State.LOGGEDOUT;
-        if (params.length == 3){
+        if (params.length == 3) {
             var userData = new UserData(params[0], params[1], params[2]);
             authData = server.register(userData);
             state = State.LOGGEDIN;
-            return String.format("You registered and logged in as %s.", params[0]);
-        }
-        else {
+            return String.format("You registered and logged in as %s. Press enter for more options \uD83D\uDC97", params[0]);
+        } else {
             throw new ResponseException(400, "Expected: <username> <password> <email>");
         }
     }
@@ -61,28 +61,35 @@ public class Client {
     public String logout() throws ResponseException {
         if (state == State.LOGGEDIN) {
             state = State.LOGGEDOUT;
+            server.logout(authData);
             return String.format("You have logged out", authData.username());
-        }
-        else {
+        } else {
             throw new ResponseException(400, "You are not logged in");
         }
     }
 
     public String listGames() throws ResponseException {
         var gameList = server.listGames(authData);
-        if (gameList.toString().isEmpty()){
+        if (gameList.toString().isEmpty()) {
             return "Please create a game";
+        } else {
+            return gameList.toString();
         }
+    }
+    public String createGames(String... params) throws ResponseException {
+        if (params.length == 1){
+        int gameID = server.createGame(authData);
+        return String.format("you game ID is: ", gameID);
+    }
+        throw new ResponseException(400, "Expected: <game_name>");
+    }
 
-        return gameList.toString();
-        }
 
 
-
-    public  String help() {
+    public String help() {
         if (state == State.LOGGEDOUT) {
             return """
-                    - login <yourname> <password>
+                    - login <username> <password>
                     - register <username> <password> <email>
                     - quit
                     """;
@@ -95,6 +102,7 @@ public class Client {
                 - quit
                 """;
     }
+
     private void assertLoggedIn() throws ResponseException {
         if (state == State.LOGGEDOUT) {
             throw new ResponseException(400, "Please login or register :)");

@@ -39,12 +39,17 @@ public class ServerFacade {
 
     public void logout(AuthData authData) throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, authData.authToken(), null);
+        this.makeRequest("DELETE", path, authData, null);
     }
 
     public GameListData listGames(AuthData authData) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, authData.authToken(), GameListData.class);
+        return this.makeRequest("GET", path, authData, GameListData.class);
+    }
+
+    public int createGame(AuthData authData) throws ResponseException {
+        var path = "/game";
+        return this.makeRequest("POST", path, authData, int.class);
     }
 
 
