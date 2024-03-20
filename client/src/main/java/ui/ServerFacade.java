@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -22,46 +23,46 @@ public class ServerFacade {
 
     public void clear() throws ResponseException {
         var path = "/db";
-        this.makeRequest("DELETE", path, null,  null, null);
+        this.makeRequest("DELETE", path, null,  null, null, null);
     }
 
     public AuthData register(UserData userData) throws ResponseException {
         var path = "/user";
-        var authData = this.makeRequest("POST", path, userData , null, AuthData.class);
+        var authData = this.makeRequest("POST", path, userData , null, AuthData.class, null);
         authToken = authData.authToken();
         return authData;
     }
 
     public AuthData login(UserData userData) throws ResponseException {
         var path = "/session";
-        var authData = this.makeRequest("POST", path, userData, null, AuthData.class);
+        var authData = this.makeRequest("POST", path, userData, null, AuthData.class, null);
         authToken = authData.authToken();
         return authData;
     }
 
     public void logout() throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, null, authToken, null);
+        this.makeRequest("DELETE", path, null, authToken, null, null);
     }
 
     public GameListData listGames() throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, null,  authToken, GameListData.class);
+        return this.makeRequest("GET", path, null,  authToken, GameListData.class, null);
     }
 
     public CreateGameResponse createGame(GameData gameData) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("POST", path, gameData, authToken, CreateGameResponse.class);
+        return this.makeRequest("POST", path, gameData, authToken, CreateGameResponse.class, null);
     }
 
-    public ChessBoardUI joinGame() throws ResponseException {
+    public ChessGame joinGame() throws ResponseException {
         var path = "/game";
-        return this.makeRequest("PUT", path, null,  authToken, ChessBoardUI.class);
+        return this.makeRequest("PUT", path, null,  authToken, ChessGame.class, ChessBoardUI.class);
     }
 
 
 
-    private <T> T makeRequest(String method, String path, Object request, String header,  Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, String header,  Class<T> responseClass, Class<T> chessboardUIClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
@@ -72,7 +73,7 @@ public class ServerFacade {
             writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
-            return readBody(http, responseClass);
+            return readBody(http, responseClass, chessboardUIClass);
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }
@@ -95,17 +96,23 @@ public class ServerFacade {
         }
     }
 
-    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
+    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass, Class<T> chessboardUIClass) throws IOException {
         T response = null;
+        ChessBoardUI response2 = null;
         if (http.getContentLength() < 0) {
             try (InputStream respBody = http.getInputStream()) {
                 InputStreamReader reader = new InputStreamReader(respBody);
                 if (responseClass != null) {
                     response = new Gson().fromJson(reader, responseClass);
                 }
+//                if (chessboardUIClass == null) {
+//                    response2 = new ChessBoardUI();
+//                    return (T) response2;
+//                }
             }
         }
         return response;
+
     }
 
 

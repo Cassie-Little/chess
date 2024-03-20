@@ -74,23 +74,31 @@ public class Client {
         if (gameList.toString().isEmpty()) {
             return "Please create a game";
         } else {
-            return gameList.toString();
+            String listedGames = formatNumberedList(gameList);
+            return listedGames;
         }
+    }
+    private String formatNumberedList( model.GameListData gameList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < gameList.games().size(); i++) {
+            stringBuilder.append((i + 1) + ". " + gameList.games().get(i) + "\n");
+        }
+        return stringBuilder.toString();
     }
 
     public String createGames(String... params) throws ResponseException {
         if (params.length == 1) {
             var gameData = new GameData(0, null, null, params[0], null);
             int gameID = server.createGame(gameData).gameID();
-            return String.format("you game ID is: ", gameID);
+            return String.format("you game ID is: %s", gameID);
         }
         throw new ResponseException(400, "Expected: <game_name>");
     }
 
     public String joinGame(String... params) throws ResponseException {
         if (params.length == 2) {
-            var gameBoard = server.joinGame();
-            return String.format("Your game" + gameBoard);
+            var game = server.joinGame();
+            return String.format("Your game" + game);
         }
         throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/observer)>");
     }
