@@ -36,13 +36,22 @@ public class Client {
                 case "list_games" -> listGames();
                 case "logout" -> logout();
                 case "join_game" -> joinGame(params);
+                case "observe_game" -> joinAsObserver(params);
                 case "create_game" -> createGames(params);
+                case "clear" -> clear();
                 case "quit" -> "quit";
+                case "help" -> help();
                 default -> help();
             };
         } catch (exception.ResponseException ex) {
             return ex.getMessage();
         }
+    }
+
+    public String clear() throws ResponseException {
+        assertLoggedIn();
+        server.clear();
+        return "deleted all games and users";
     }
 
     public String login(String... params) throws exception.ResponseException {
@@ -68,16 +77,15 @@ public class Client {
     }
 
     public String logout() throws ResponseException {
-        if (state == State.LOGGEDIN) {
-            state = State.LOGGEDOUT;
-            server.logout(authData.authToken());
-            return String.format("You have logged out", authData.username());
-        } else {
-            throw new ResponseException(400, "You are not logged in");
-        }
+        assertLoggedIn();
+        state = State.LOGGEDOUT;
+        server.logout(authData.authToken());
+        return String.format("You have logged out", authData.username());
+
     }
 
     public String listGames() throws ResponseException {
+        assertLoggedIn();
         var gameList = server.listGames(authData.authToken());
         if (gameList.toString().isEmpty()) {
             return "Please create a game";
@@ -86,7 +94,8 @@ public class Client {
             return listedGames;
         }
     }
-    private String formatNumberedList( model.GameListData gameList) {
+
+    private String formatNumberedList(model.GameListData gameList) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < gameList.games().size(); i++) {
             stringBuilder.append((i + 1) + ". " + gameList.games().get(i) + "\n");
@@ -95,6 +104,7 @@ public class Client {
     }
 
     public String createGames(String... params) throws ResponseException {
+        assertLoggedIn();
         if (params.length == 1) {
             var game = new ChessGame();
             var board = new ChessBoard();
@@ -107,10 +117,12 @@ public class Client {
         throw new ResponseException(400, "Expected: <game_name>");
     }
 
+
     public String joinGame(String... params) throws ResponseException {
+        assertLoggedIn();
         if (params.length >= 1) {
             int gameID = Integer.parseInt(params[0]);
-            String teamColorString  = params.length == 2? params[1].toUpperCase() : null;
+            String teamColorString = params.length == 2 ? params[1].toUpperCase() : null;
             var joinGameData = new JoinGameData(teamColorString, gameID);
             server.joinGame(authData.authToken(), joinGameData);
             var gameData = server.getGame(authData.authToken(), gameID);
@@ -121,6 +133,20 @@ public class Client {
         throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/empty)>");
     }
 
+    public String joinAsObserver(String... params) throws ResponseException {
+        assertLoggedIn();
+        if (params.length == 1) {
+            int gameID = Integer.parseInt(params[0]);
+            var joinGameData = new JoinGameData(null, gameID);
+            server.joinGame(authData.authToken(), joinGameData);
+            var gameData = server.getGame(authData.authToken(), gameID);
+            ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.WHITE);
+            ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.BLACK);
+            return String.format("Your game: %s", gameData.gameName());
+        }
+        throw new ResponseException(400, "Expected: <gameID>");
+    }
+
 
     public String help() {
         if (state == State.LOGGEDOUT) {
@@ -128,14 +154,18 @@ public class Client {
                     - login <username> <password>
                     - register <username> <password> <email>
                     - quit
+                    - help
                     """;
         }
         return """
                 - list_games
                 - create_game <enter a name>
-                - join_game <gameID> <enter black or white or observe>
+                - join_game <gameID> <enter black or white>
+                - observe_game <gameID>
                 - logout
                 - quit
+                - clear
+                -help
                 """;
     }
 
