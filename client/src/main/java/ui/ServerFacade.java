@@ -1,6 +1,5 @@
 package ui;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
@@ -15,7 +14,6 @@ import java.net.URL;
 
 public class ServerFacade {
     private final String serverUrl;
-    private String authToken;
 
     public ServerFacade(String url) {
         serverUrl = url;
@@ -23,57 +21,64 @@ public class ServerFacade {
 
     public void clear() throws ResponseException {
         var path = "/db";
-        this.makeRequest("DELETE", path, null,  null, null, null);
+        this.makeRequest("DELETE", path, null,  null, null);
     }
 
     public AuthData register(UserData userData) throws ResponseException {
         var path = "/user";
-        var authData = this.makeRequest("POST", path, userData , null, AuthData.class, null);
-        authToken = authData.authToken();
+        var authData = this.makeRequest("POST", path, userData , null, AuthData.class);
         return authData;
     }
 
     public AuthData login(UserData userData) throws ResponseException {
         var path = "/session";
-        var authData = this.makeRequest("POST", path, userData, null, AuthData.class, null);
-        authToken = authData.authToken();
+        var authData = this.makeRequest("POST", path, userData, null, AuthData.class);
         return authData;
     }
 
-    public void logout() throws ResponseException {
+    public void logout(String authToken) throws ResponseException {
         var path = "/session";
-        this.makeRequest("DELETE", path, null, authToken, null, null);
+        this.makeRequest("DELETE", path, null, authToken, null);
     }
 
-    public GameListData listGames() throws ResponseException {
+    public GameListData listGames(String authToken) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("GET", path, null,  authToken, GameListData.class, null);
+        return this.makeRequest("GET", path, null,  authToken, GameListData.class);
     }
 
-    public CreateGameResponse createGame(GameData gameData) throws ResponseException {
+    public GameData createGame(String authToken, GameData gameData) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("POST", path, gameData, authToken, CreateGameResponse.class, null);
+        return this.makeRequest("POST", path, gameData, authToken, GameData.class);
     }
 
-    public ChessGame joinGame() throws ResponseException {
+    public void joinGame(String authToken, JoinGameData gameData) throws ResponseException {
         var path = "/game";
-        return this.makeRequest("PUT", path, null,  authToken, ChessGame.class, ChessBoardUI.class);
+        this.makeRequest("PUT", path, gameData,  authToken, GameData.class);
+
+    }
+    public GameData getGame(String authToken, int gameID) throws ResponseException {
+        var path = "/game?gameID="+gameID;
+        return this.makeRequest("GET", path, null,  authToken, GameData.class);
+    }
+
+    public void updateGame(String authToken, GameData gameData) throws ResponseException {
+        var path = "/game";
+        this.makeRequest("PATCH", path, gameData, authToken, GameData.class);
     }
 
 
 
-    private <T> T makeRequest(String method, String path, Object request, String header,  Class<T> responseClass, Class<T> chessboardUIClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, String header,  Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
             http.addRequestProperty("Authorization", header);
-
             writeBody(request, http);
             http.connect();
             throwIfNotSuccessful(http);
-            return readBody(http, responseClass, chessboardUIClass);
+            return readBody(http, responseClass);
         } catch (Exception ex) {
             throw new ResponseException(500, ex.getMessage());
         }
@@ -96,7 +101,7 @@ public class ServerFacade {
         }
     }
 
-    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass, Class<T> chessboardUIClass) throws IOException {
+    private static <T> T readBody(HttpURLConnection http, Class<T> responseClass) throws IOException {
         T response = null;
         ChessBoardUI response2 = null;
         if (http.getContentLength() < 0) {

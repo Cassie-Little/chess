@@ -13,7 +13,7 @@ public class SQLGameDAOTests {
     @Test
     public void createGamePositiveTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
-        var gameID = gameDAO.createGame("NEW GAME");
+        var gameID = gameDAO.createGame(new GameData(0, null, null, "NEW GAME", null));
         Assertions.assertTrue(gameID >= 0);
     }
 
@@ -28,7 +28,7 @@ public class SQLGameDAOTests {
     @Test
     public void getGamePositiveTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
-        var gameID = gameDAO.createGame("NEW GAME");
+        var gameID = gameDAO.createGame(new GameData(0, null, null, "NEW GAME", null));
         var game = gameDAO.getGame(gameID);
         Assertions.assertNotNull(game);
         Assertions.assertEquals("NEW GAME", game.gameName());
@@ -46,7 +46,7 @@ public class SQLGameDAOTests {
     @Test
     public void updateGamePositiveTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
-        var gameID = gameDAO.createGame("NEW GAME");
+        var gameID = gameDAO.createGame(new GameData(0, null, null, "NEW GAME", null));
         var gameData = gameDAO.getGame(gameID);
         var newGame = new ChessGame();
         var board = new ChessBoard();
@@ -67,7 +67,7 @@ public class SQLGameDAOTests {
     @Test
     public void updateGameNegativeTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
-        var gameID = gameDAO.createGame("NEW GAME");
+        var gameID = gameDAO.createGame(new GameData(0, null, null, "NEW GAME", null));
         var gameData = gameDAO.getGame(gameID);
         var updatedGame = new GameData(gameID, "bob", "george", "Invalid Game Name", new ChessGame()); // Invalid game name
         gameDAO.updateGame(updatedGame);
@@ -78,7 +78,7 @@ public class SQLGameDAOTests {
     @Test
     public void clearTest() throws DataAccessException {
         var gameDAO = new SQLGameDAO();
-        var gameID = gameDAO.createGame("NEW GAME");
+        var gameID = gameDAO.createGame(new GameData(0, null, null, "NEW GAME", null));
         var gameData = gameDAO.getGame(gameID);
         var newGame = new ChessGame();
         var board = new ChessBoard();

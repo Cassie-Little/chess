@@ -32,7 +32,7 @@ public class GameService {
 
     public int createGame(String authToken, GameData gameData) throws DataAccessException {
         authDAO.getUsername(authToken);
-        return this.gameDAO.createGame(gameData.gameName());
+        return this.gameDAO.createGame(gameData);
     }
 
     public void joinGame(String authToken, JoinGameData joinGameData) throws DataAccessException {
@@ -42,13 +42,13 @@ public class GameService {
             joinAsWatcher();
             return;
         } else if (joinGameData.playerColor().equals("WHITE")) {
-            if (game.whiteUsername() != null) {
+            if (game.whiteUsername() != null && !game.whiteUsername().equals(username)) {
                 throw new DataAccessException("Error: already taken");
             }
             var gameData = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
             gameDAO.updateGame(gameData);
         } else if (joinGameData.playerColor().equals("BLACK")) {
-            if (game.blackUsername() != null) {
+            if (game.blackUsername() != null && !game.blackUsername().equals(username)) {
                 throw new DataAccessException("Error: already taken");
             }
             var gameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
@@ -56,6 +56,16 @@ public class GameService {
         } else {
             throw new DataAccessException("Error: bad request");
         }
+    }
+
+    public void updateGame(String authToken, GameData gameData) throws DataAccessException {
+        authDAO.getUsername(authToken);
+        gameDAO.updateGame(gameData);
+    }
+
+    public GameData getGame(String authToken, int gameID) throws DataAccessException {
+        authDAO.getUsername(authToken);
+        return gameDAO.getGame(gameID);
     }
 
     public void joinAsWatcher() {

@@ -13,38 +13,38 @@ public class ChessBoardUI {
     private static final int SQUARE_SIZE_IN_CHARS = 3;
 
     private static final String EMPTY = " ";
+    private static final String[] whiteHeaders = {" ", "a", "b", "c", "d", "e", "f", "g", "h", " "};
+    private static final String[] blackHeaders = {" ", "h", "g", "f", "e", "d", "c", "b", "a", " "};
+    private static final String[] whiteSideNums = {"8", "7", "6", "5", "4", "3", "2", "1"};
+    private static final String[] blackSideNums = {"1", "2", "3", "4", "5", "6", "7", "8"};
+
 
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         var board = new chess.ChessBoard();
         board.resetBoard();
-        displayBoard(out, board);
+        displayBoard(out, board, ChessGame.TeamColor.WHITE);
     }
-    public static void displayBoard(PrintStream out, chess.ChessBoard board) {
+    public static void displayBoard(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor teamColor) {
         out.print(ERASE_SCREEN);
-        drawHeaders(out);
-        drawBoard(out, board);
-        drawHeaders(out);
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_WHITE);
+        drawHeaders(out, teamColor);
+        drawBoard(out, board, teamColor);
+        drawHeaders(out, teamColor);
+        out.print(SET_BG_COLOR_DARK_GREY);
+        out.print(SET_TEXT_COLOR_MAGENTA);
     }
 
-    private static void drawHeaders(PrintStream out) {
+
+
+    private static void drawHeaders(PrintStream out, ChessGame.TeamColor teamColor) {
 
         setGreen(out);
-        String[] headers = {" ", "a", "b", "c", "d", "e", "f", "g", "h", " "};
+        var headers = teamColor == ChessGame.TeamColor.WHITE? whiteHeaders : blackHeaders;
         for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
             drawHeader(out, headers[boardCol]);
         }
         out.println();
-    }
-
-
-    private static void printNumText(PrintStream out, String nums) {
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_MAGENTA);
-        out.print(nums);
     }
 
     private static void drawHeader(PrintStream out, String headerText) {
@@ -60,8 +60,17 @@ public class ChessBoardUI {
         setGreen(out);
     }
 
-    private static void drawBoard(PrintStream out, chess.ChessBoard board) {
-        String[] sideNums = {"8", "7", "6", "5", "4", "3", "2", "1"};
+    private static void drawBoard(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor teamColor) {
+        if (teamColor == ChessGame.TeamColor.WHITE) {
+            drawBoardWhite(out, board);
+        }
+        else {
+            drawBoardBlack(out, board);
+        }
+
+    }
+    private static void drawBoardWhite(PrintStream out, chess.ChessBoard board) {
+        var sideNums =  blackSideNums;
         for (int boardRow = 0; boardRow < 8; ++boardRow) {
             drawSideNumber(out, sideNums[boardRow]);
             for (int col = 0; col < 8; ++col) {
@@ -74,15 +83,29 @@ public class ChessBoardUI {
         }
 
     }
+    private static void drawBoardBlack(PrintStream out, chess.ChessBoard board) {
+        var sideNums = blackSideNums;
+        for (int boardRow = 7; boardRow >= 0; --boardRow) {
+            drawSideNumber(out, sideNums[boardRow]);
+            for (int col = 7; col >= 0; --col) {
+                var position = new chess.ChessPosition(boardRow+1, col+1);
+                var piece = board.getPiece(position);
+                drawPiece(out, piece, boardRow, col);
+            }
+            drawSideNumber(out, sideNums[boardRow]);
+            out.println();
+        }
+
+    }
 
     private static String getPieceText(ChessPiece.PieceType type) {
         return switch (type) {
-            case KING -> "K";
-            case QUEEN -> "Q";
-            case ROOK -> "R";
-            case BISHOP -> "B";
-            case PAWN -> "P";
-            case KNIGHT -> "N";
+            case KING -> "♔";
+            case QUEEN -> "♕";
+            case ROOK -> "♖";
+            case BISHOP -> "♗";
+            case PAWN -> "♙";
+            case KNIGHT -> "♘";
             default -> " ";
         };
     }

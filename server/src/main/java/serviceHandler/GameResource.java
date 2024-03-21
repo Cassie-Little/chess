@@ -26,6 +26,7 @@ public class GameResource {
         Spark.delete("/db", this::clearRequest);
         Spark.post("/game", this::createGameRequest);
         Spark.put("/game", this::joinGameRequest);
+        Spark.patch("/game", this::updateGame);
     }
 
 
@@ -37,8 +38,16 @@ public class GameResource {
     private String listGamesRequest(Request request, Response response) {
         try {
             var authToken = request.headers("authorization");
-            var games = this.gameService.listGames(authToken);
-            return serializer.toJson(games);
+            var gameID = request.queryParams("gameID");
+            if (gameID == null) {
+                var games = this.gameService.listGames(authToken);
+                return serializer.toJson(games);
+            }
+            else {
+                var game = this.gameService.getGame(authToken, Integer.parseInt(gameID));
+                return serializer.toJson(game);
+            }
+
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {
                 response.status(401);
@@ -73,6 +82,26 @@ public class GameResource {
             var authToken = request.headers("authorization");
             var joinGameData = serializer.fromJson(request.body(), JoinGameData.class);
             this.gameService.joinGame(authToken, joinGameData);
+            return "";
+        } catch (DataAccessException e) {
+            if (e.getMessage().equals("Error: unauthorized")) {
+                response.status(401);
+            } else if (e.getMessage().equals("Error: bad request")) {
+                response.status(400);
+            } else if (e.getMessage().equals("Error: already taken")) {
+                response.status(403);
+            } else {
+                response.status(500);
+            }
+            return "{ \"message\": \"" + e.getMessage() + "\" }";
+        }
+    }
+
+    private String updateGame(Request request, Response response) {
+        try {
+            var authToken = request.headers("authorization");
+            var gameData = serializer.fromJson(request.body(), GameData.class);
+            this.gameService.updateGame(authToken, gameData);
             return "";
         } catch (DataAccessException e) {
             if (e.getMessage().equals("Error: unauthorized")) {

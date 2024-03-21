@@ -56,11 +56,11 @@ public class SQLGameDAO implements GameDAO {
 
 
     @Override
-    public int createGame(String gameName) throws DataAccessException {
-        if (gameName == null || gameName.isBlank()) {
+    public int createGame(GameData gameData) throws DataAccessException {
+        if (gameData == null || gameData.gameName() == null || gameData.gameName().isBlank()) {
             throw new DataAccessException("Error: bad request");
         }
-        var json = new Gson().toJson(new GameData(0, null, null, gameName, null));
+        var json = new Gson().toJson(gameData);
         var statement = "INSERT INTO gameData (json) VALUES(?)";
         var id = DatabaseManager.executeUpdate(statement, json);
         return id;

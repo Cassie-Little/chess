@@ -1,10 +1,15 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
+import model.JoinGameData;
 import model.UserData;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class Client {
@@ -12,9 +17,12 @@ public class Client {
     private ServerFacade server;
     private State state = State.LOGGEDOUT;
     private AuthData authData;
+    private PrintStream out;
+
 
     public Client(String serverURL) {
         server = new ServerFacade(serverURL);
+        out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }
 
     public String eval(String input) {
@@ -62,7 +70,7 @@ public class Client {
     public String logout() throws ResponseException {
         if (state == State.LOGGEDIN) {
             state = State.LOGGEDOUT;
-            server.logout();
+            server.logout(authData.authToken());
             return String.format("You have logged out", authData.username());
         } else {
             throw new ResponseException(400, "You are not logged in");
@@ -70,7 +78,7 @@ public class Client {
     }
 
     public String listGames() throws ResponseException {
-        var gameList = server.listGames();
+        var gameList = server.listGames(authData.authToken());
         if (gameList.toString().isEmpty()) {
             return "Please create a game";
         } else {
@@ -88,19 +96,29 @@ public class Client {
 
     public String createGames(String... params) throws ResponseException {
         if (params.length == 1) {
-            var gameData = new GameData(0, null, null, params[0], null);
-            int gameID = server.createGame(gameData).gameID();
+            var game = new ChessGame();
+            var board = new ChessBoard();
+            board.resetBoard();
+            game.setBoard(board);
+            var gameData = new GameData(0, null, null, params[0], game);
+            int gameID = server.createGame(authData.authToken(), gameData).gameID();
             return String.format("you game ID is: %s", gameID);
         }
         throw new ResponseException(400, "Expected: <game_name>");
     }
 
     public String joinGame(String... params) throws ResponseException {
-        if (params.length == 2) {
-            var game = server.joinGame();
-            return String.format("Your game" + game);
+        if (params.length >= 1) {
+            int gameID = Integer.parseInt(params[0]);
+            String teamColorString  = params.length == 2? params[1].toUpperCase() : null;
+            var joinGameData = new JoinGameData(teamColorString, gameID);
+            server.joinGame(authData.authToken(), joinGameData);
+            var gameData = server.getGame(authData.authToken(), gameID);
+            ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.WHITE);
+            ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.BLACK);
+            return String.format("Your game: %s", gameData.gameName());
         }
-        throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/observer)>");
+        throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/empty)>");
     }
 
 

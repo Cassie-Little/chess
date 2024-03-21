@@ -2,11 +2,9 @@ package dataAccess;
 
 import model.GameData;
 import model.GameListData;
-import model.JoinGameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MemoryGameDAO implements GameDAO {
@@ -33,12 +31,12 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public int createGame(String gameName) throws DataAccessException {
-        if (gameName == null || gameName.isBlank()) {
+    public int createGame(GameData gameData) throws DataAccessException {
+        if (gameData == null || gameData.gameName() == null || gameData.gameName().isBlank()) {
             throw new DataAccessException("Error: bad request");
         }
         id++;
-        gameDB.put(id, new GameData(id, null, null, gameName, null));
+        gameDB.put(id, gameData);
         return id;
     }
 
