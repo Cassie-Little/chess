@@ -15,6 +15,8 @@ import java.util.Arrays;
 public class Client {
     private String player = null;
     private ServerFacade server;
+
+    private int port;
     private State state = State.LOGGEDOUT;
     private AuthData authData;
     private PrintStream out;

@@ -15,8 +15,10 @@ import java.net.URL;
 public class ServerFacade {
     private final String serverUrl;
 
-    public ServerFacade(String url) {
+
+    public ServerFacade( String url) {
         serverUrl = url;
+
     }
 
     public void clear() throws ResponseException {
@@ -110,10 +112,6 @@ public class ServerFacade {
                 if (responseClass != null) {
                     response = new Gson().fromJson(reader, responseClass);
                 }
-//                if (chessboardUIClass == null) {
-//                    response2 = new ChessBoardUI();
-//                    return (T) response2;
-//                }
             }
         }
         return response;
