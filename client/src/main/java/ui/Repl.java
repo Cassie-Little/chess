@@ -2,7 +2,8 @@ package ui;
 
 import java.util.Scanner;
 
-import static ui.EscapeSequences.*;
+import static ui.EscapeSequences.RESET_TEXT_COLOR;
+import static ui.EscapeSequences.SET_TEXT_COLOR_MAGENTA;
 
 public class Repl {
     final Client client;

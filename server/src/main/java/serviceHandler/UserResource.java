@@ -12,9 +12,11 @@ public class UserResource {
     final UserService userService;
     final Gson serializer;
 
+
     public UserResource(UserService userService, Gson serializer) {
         this.userService = userService;
         this.serializer = serializer;
+
     }
 
     public void registerRoutes() {

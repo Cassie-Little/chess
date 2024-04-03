@@ -7,22 +7,30 @@ import model.AuthData;
 import model.GameData;
 import model.JoinGameData;
 import model.UserData;
+import webSocketMessages.serverMessages.GameError;
+import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.userCommands.JoinPlayer;
+import websocket.NotificationHandler;
+import websocket.WebSocketFacade;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-public class Client {
+public class Client implements NotificationHandler {
     private String player = null;
     private ServerFacade server;
-
-    private int port;
+    private WebSocketFacade webSocket;
     private State state = State.LOGGEDOUT;
     private AuthData authData;
     private PrintStream out;
+    private String serverURL;
+
 
 
     public Client(String serverURL) {
+        this.serverURL =serverURL;
         server = new ServerFacade(serverURL);
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }
@@ -61,6 +69,7 @@ public class Client {
             var userData = new UserData(params[0], params[1], null);
             authData = server.login(userData);
             state = State.LOGGEDIN;
+            webSocket = new WebSocketFacade(serverURL, this);
             return String.format("You signed in as %s. Press enter for more options \uD83D\uDC97", params[0]);
         }
         throw new exception.ResponseException(400, "Expected: <username> <password>");
@@ -82,6 +91,7 @@ public class Client {
         assertLoggedIn();
         state = State.LOGGEDOUT;
         server.logout(authData.authToken());
+        webSocket = null;
         return String.format("You have logged out", authData.username());
 
     }
@@ -127,10 +137,14 @@ public class Client {
             String teamColorString = params.length == 2 ? params[1].toUpperCase() : null;
             var joinGameData = new JoinGameData(teamColorString, gameID);
             server.joinGame(authData.authToken(), joinGameData);
-            var gameData = server.getGame(authData.authToken(), gameID);
-            ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.WHITE);
-            ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.BLACK);
-            return String.format("Your game: %s", gameData.gameName());
+            if (teamColorString != null) {
+                var teamColor = Enum.valueOf(ChessGame.TeamColor.class, teamColorString);
+                webSocket.joinPlayer(new JoinPlayer(authData.authToken(), gameID, teamColor ));
+            }
+           var gameData = server.getGame(authData.authToken(), gameID);
+            //ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.WHITE);
+            //ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.BLACK);
+           return "";
         }
         throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/empty)>");
     }
@@ -177,4 +191,22 @@ public class Client {
         }
     }
 
+
+    @Override
+    public void notify(Notification notification) {
+        System.out.println(notification.getMessage());
+    }
+
+    @Override
+    public void loadGame(LoadGame loadGame) {
+        var blackUser = loadGame.getGameData().blackUsername();
+        var teamColor = blackUser != null && blackUser.equals(player)? ChessGame.TeamColor.BLACK: ChessGame.TeamColor.WHITE;
+        ChessBoardUI.displayBoard(out, loadGame.getGameData().game().getBoard(), teamColor);
+        String.format("Your game: %s", loadGame.getGameData().gameName());
+    }
+
+    @Override
+    public void error(GameError gameError) {
+        System.out.println("Error: " + gameError.getErrorMessage());
+    }
 }
