@@ -7,7 +7,7 @@ import static ui.EscapeSequences.SET_TEXT_COLOR_MAGENTA;
 
 public class Repl {
     final Client client;
-    public Repl(String serverUrl) {
+    public Repl(String serverUrl) throws exception.ResponseException {
 
         client = new Client(serverUrl);
     }

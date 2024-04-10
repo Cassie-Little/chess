@@ -7,6 +7,8 @@ import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
+import webSocketMessages.userCommands.Leave;
+import webSocketMessages.userCommands.Resign;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -65,6 +67,22 @@ public class WebSocketFacade extends Endpoint {
     public void joinObserver(JoinObserver joinObserver) throws exception.ResponseException {
         try {
             this.session.getBasicRemote().sendText(gson.toJson(joinObserver));
+        } catch (IOException ex) {
+            throw new exception.ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void leave(Leave leave) throws exception.ResponseException {
+        try {
+            this.session.getBasicRemote().sendText(gson.toJson(leave));
+        } catch (IOException ex) {
+            throw new exception.ResponseException(500, ex.getMessage());
+        }
+    }
+
+    public void resign(Resign resign) throws exception.ResponseException {
+        try {
+            this.session.getBasicRemote().sendText(gson.toJson(resign));
         } catch (IOException ex) {
             throw new exception.ResponseException(500, ex.getMessage());
         }
