@@ -13,10 +13,7 @@ import service.UserService;
 import webSocketMessages.serverMessages.GameError;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.MakeMove;
-import webSocketMessages.userCommands.UserGameCommand;
+import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
 
@@ -43,8 +40,8 @@ public class WebSocketHandler {
                 case UserGameCommand.CommandType.JOIN_PLAYER -> this.joinPlayer(session, message);
                 case UserGameCommand.CommandType.JOIN_OBSERVER -> this.joinObserver(session, message);
                 case UserGameCommand.CommandType.MAKE_MOVE -> this.makeMove(session, message);
-//            case LEAVE -> leave(userGameCommand.getAuthString());
-//            case RESIGN -> resign(userGameCommand.getAuthString());
+                case UserGameCommand.CommandType.LEAVE -> this.leave(session, message);
+                case UserGameCommand.CommandType.RESIGN -> this.resign(session, message);
                 default -> throw new DataAccessException("default");
             }
         } catch (Exception e) {
@@ -64,7 +61,6 @@ public class WebSocketHandler {
             }
             connections.add(player, session);
             sendLoadGame(session, gameData);
-
             broadcastNotification(player, String.format("%s is joining as %s", player, joinPlayer.getPlayerColor()));
         } else {
             throw new DataAccessException("bad message");
@@ -129,31 +125,24 @@ public class WebSocketHandler {
         throw new DataAccessException("username does not match color");
     }
 
-//    public void leave(String authoken) throws IOException, DataAccessException {
-//        String visitorName = authDAO.getUsername(authoken);
-//        connections.remove(visitorName);
-//        //update game database
-//        var message = String.format("%s left the game", visitorName);
-//        //var notification = new ServerMessage(ServerMessage.Type.DEPARTURE, message);
-//        //connections.broadcast(visitorName, message);
-//    }
-//
-//    public void resign(String authoken) throws IOException, DataAccessException {
-//        String visitorName = authDAO.getUsername(authoken);
-//        connections.remove(visitorName);
-//        //update gme database
-//        var message = String.format("%s resigned", visitorName);
-//        //var notification = new ServerMessage(ServerMessage.Type.DEPARTURE, message);
-//        //connections.broadcast(visitorName, message);
-//    }
-//
-//    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var notification = new ServerMessage(ServerMessage.Type.NOISE, message);
-//            connections.broadcast("", notification);
-//        } catch (Exception ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
+    public void leave(Session session, String message) throws IOException, DataAccessException {
+        var leave = gson.fromJson(message, Leave.class);
+        var username = userService.getUser(leave.getAuthString());
+        connections.remove(username);
+        var gameData = gameService.getGame(leave.getAuthString(), leave.getGameID());
+        gameService.updateGame(leave.getAuthString(), gameData);
+        broadcastNotification(username, String.format("%s left the game", username));
+    }
+
+    public void resign(Session session, String message) throws IOException, DataAccessException {
+        var resign = gson.fromJson(message, Resign.class);
+        var username = userService.getUser(resign.getAuthString());
+        //connections.remove(username);
+        var gameData = gameService.getGame(resign.getAuthString(), resign.getGameID());
+        gameService.updateGame(resign.getAuthString(), gameData);
+        gameData.game();
+        broadcastNotification(username, String.format("%s resigned from the game", username));
+
+    }
+
 }

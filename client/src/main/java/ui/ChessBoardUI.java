@@ -79,7 +79,7 @@ public class ChessBoardUI {
     }
 
     private static void drawBoardWhite(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
-        var sideNums =  whiteSideNums;
+        var sideNums =  blackSideNums;
         for (int boardRow = 0; boardRow < 8; ++boardRow) {
             drawSideNumber(out, sideNums[boardRow]);
             for (int col = 0; col < 8; ++col) {
