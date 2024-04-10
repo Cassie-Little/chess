@@ -137,10 +137,10 @@ public class WebSocketHandler {
     public void resign(Session session, String message) throws IOException, DataAccessException {
         var resign = gson.fromJson(message, Resign.class);
         var username = userService.getUser(resign.getAuthString());
-        //connections.remove(username);
+        connections.remove(username);
         var gameData = gameService.getGame(resign.getAuthString(), resign.getGameID());
         gameService.updateGame(resign.getAuthString(), gameData);
-        gameData.game();
+        gameData.game().setTeamTurn(null);
         broadcastNotification(username, String.format("%s resigned from the game", username));
 
     }

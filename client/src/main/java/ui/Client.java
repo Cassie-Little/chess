@@ -52,6 +52,7 @@ public class Client implements NotificationHandler {
                 case "quit" -> "quit";
                 case "help" -> help();
                 case "highlight" -> highlight(params);
+                case "redraw_board" -> redrawBoard(params);
                 default -> help();
             };
         } catch (exception.ResponseException ex) {
@@ -71,9 +72,21 @@ public class Client implements NotificationHandler {
             var chessPosition = parsePosition(params);
             var gameData = server.getGame(authData.authToken(), gameID);
             var teamColor = gameData.blackUsername().equals(authData.username()) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-            ChessBoardUI.displayLegalMoves(out, gameData.game().getBoard(), teamColor,chessPosition);
+            ChessBoardUI.displayLegalMoves(out, gameData.game().getBoard(), teamColor, chessPosition);
         }
         throw new exception.ResponseException(400, "Expected: <position>");
+    }
+
+    public String redrawBoard(String... params) throws ResponseException {
+        if (params.length == 2) {
+            String teamColorString = params[1].toUpperCase();
+            var teamColor = Enum.valueOf(ChessGame.TeamColor.class, teamColorString);
+            int gameID = Integer.parseInt(params[0]);
+            var gameData = server.getGame(authData.authToken(), gameID);
+            ChessBoardUI.displayBoard(out,gameData.game().getBoard(), teamColor);
+            return "here's your board";
+        }
+        throw new exception.ResponseException(400, "Expected: <gameID> <position>");
     }
 
     private static ChessPosition parsePosition(String[] params) throws ResponseException {
@@ -196,6 +209,8 @@ public class Client implements NotificationHandler {
                 - create_game <enter a name>
                 - join_game <gameID> <enter black or white>
                 - observe_game <gameID>
+                - redraw_board <gameID> <your color>
+                - highlight <gameID> <position (ex. a2)>
                 - logout
                 - quit
                 - clear
