@@ -1,5 +1,7 @@
 package service;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
@@ -32,7 +34,12 @@ public class GameService {
 
     public int createGame(String authToken, GameData gameData) throws DataAccessException {
         authDAO.getUsername(authToken);
-        return this.gameDAO.createGame(gameData);
+        var game = new ChessGame();
+        var board = new ChessBoard();
+        board.resetBoard();
+        game.setBoard(board);
+        GameData gameData1 = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
+        return this.gameDAO.createGame(gameData1);
     }
 
     public void joinGame(String authToken, JoinGameData joinGameData) throws DataAccessException {

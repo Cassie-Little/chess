@@ -1,10 +1,10 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessPiece;
+import chess.*;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 
 import static ui.EscapeSequences.*;
 
@@ -29,13 +29,22 @@ public class ChessBoardUI {
     public static void displayBoard(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor teamColor) {
         out.print(ERASE_SCREEN);
         drawHeaders(out, teamColor);
-        drawBoard(out, board, teamColor);
+        drawBoard(out, board, teamColor, null);
         drawHeaders(out, teamColor);
         out.print(SET_BG_COLOR_DARK_GREY);
         out.print(SET_TEXT_COLOR_MAGENTA);
     }
 
-
+    public static void displayLegalMoves(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor teamColor, ChessPosition position) {
+        var piece = board.getPiece(position);
+        var possibleMoves = piece == null ? null : piece.pieceMoves(board, position);
+        out.print(ERASE_SCREEN);
+        drawHeaders(out, teamColor);
+        drawBoard(out, board, teamColor, possibleMoves);
+        drawHeaders(out, teamColor);
+        out.print(SET_BG_COLOR_DARK_GREY);
+        out.print(SET_TEXT_COLOR_MAGENTA);
+    }
 
     private static void drawHeaders(PrintStream out, ChessGame.TeamColor teamColor) {
 
@@ -60,43 +69,44 @@ public class ChessBoardUI {
         setGreen(out);
     }
 
-    private static void drawBoard(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor teamColor) {
+    private static void drawBoard(PrintStream out, chess.ChessBoard board, ChessGame.TeamColor teamColor, Collection<ChessMove> possibleMoves) {
         if (teamColor == ChessGame.TeamColor.WHITE) {
-            drawBoardWhite(out, board);
+            drawBoardWhite(out, board, possibleMoves);
         }
         else {
-            drawBoardBlack(out, board);
+            drawBoardBlack(out, board, possibleMoves);
         }
-
     }
-    private static void drawBoardWhite(PrintStream out, chess.ChessBoard board) {
-        var sideNums =  blackSideNums;
+
+    private static void drawBoardWhite(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
+        var sideNums =  whiteSideNums;
         for (int boardRow = 0; boardRow < 8; ++boardRow) {
             drawSideNumber(out, sideNums[boardRow]);
             for (int col = 0; col < 8; ++col) {
                 var position = new chess.ChessPosition(boardRow+1, col+1);
                 var piece = board.getPiece(position);
-                drawPiece(out, piece, boardRow, col);
+                drawPiece(out, piece, boardRow, col, possibleMoves);
             }
             drawSideNumber(out, sideNums[boardRow]);
             out.println();
         }
 
     }
-    private static void drawBoardBlack(PrintStream out, chess.ChessBoard board) {
+    private static void drawBoardBlack(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
         var sideNums = blackSideNums;
         for (int boardRow = 7; boardRow >= 0; --boardRow) {
             drawSideNumber(out, sideNums[boardRow]);
             for (int col = 7; col >= 0; --col) {
                 var position = new chess.ChessPosition(boardRow+1, col+1);
                 var piece = board.getPiece(position);
-                drawPiece(out, piece, boardRow, col);
+                drawPiece(out, piece, boardRow, col, possibleMoves);
             }
             drawSideNumber(out, sideNums[boardRow]);
             out.println();
         }
 
     }
+
 
     private static String getPieceText(ChessPiece.PieceType type) {
         return switch (type) {
@@ -118,23 +128,61 @@ public class ChessBoardUI {
         };
     }
 
-    private static void drawPiece(PrintStream out, chess.ChessPiece piece, int rowNumber, int colNumber) {
+    private static void drawPiece(PrintStream out, chess.ChessPiece piece, int rowNumber, int colNumber, Collection<ChessMove> possibleMoves) {
         var pieceText = " ";
         var textColor = SET_TEXT_COLOR_YELLOW;
         if (piece != null) {
             pieceText = getPieceText(piece.getPieceType());
             textColor = getPieceColor(piece.getTeamColor());
         }
-        if ((colNumber+ rowNumber) % 2 == 0) {
-            out.print(SET_BG_COLOR_MAGENTA);
+        var isPossibleMove = isPossibleMove(possibleMoves, rowNumber + 1, colNumber + 1);
+        var isStartPosition = isStartPosition(possibleMoves, rowNumber + 1, colNumber + 1);
+        if (isStartPosition){
+            out.print(SET_TEXT_COLOR_YELLOW);
+        }
+        else if ((colNumber+ rowNumber) % 2 == 0) {
+            if (isPossibleMove){
+                out.print(SET_BG_COLOR_RED);
+            }
+            else{
+                out.print(SET_BG_COLOR_MAGENTA);
+            }
         } else {
-            out.print(SET_BG_COLOR_DARK_GREEN);
+            if (isPossibleMove){
+                out.print(SET_BG_COLOR_GREEN);
+            }
+            else {
+                out.print(SET_BG_COLOR_DARK_GREEN);
+            }
         }
         out.print(textColor);
         out.print(EMPTY);
         out.print(pieceText);
         out.print(EMPTY);
         setGreen(out);
+    }
+    private static boolean isPossibleMove(Collection<ChessMove> possibleMoves, int rowNumber, int colNumber){
+        if (possibleMoves == null){
+            return false;
+        }
+        for (ChessMove move : possibleMoves){
+            if (move.getEndPosition().getRow() == rowNumber && move.getEndPosition().getColumn() == colNumber){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isStartPosition(Collection<ChessMove> possibleMoves, int rowNumber, int colNumber){
+        if (possibleMoves == null){
+            return false;
+        }
+        for (ChessMove move : possibleMoves){
+            if (move.getStartPosition().getRow() == rowNumber && move.getStartPosition().getColumn() == colNumber){
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void drawSideNumber(PrintStream out, String numText) {

@@ -23,7 +23,8 @@ public class Server {
             var gameDAO = new SQLGameDAO();
             var authDAO = new SQLAuthDAO();
             var gameService = new GameService(gameDAO, userDAO, authDAO);
-            var webSocketHandler = new WebSocketHandler(gson, gameService);
+            var userService = new UserService(userDAO, authDAO);
+            var webSocketHandler = new WebSocketHandler(gson, gameService, userService);
             Spark.staticFiles.location("web");
             Spark.webSocket("/connect", webSocketHandler);
 

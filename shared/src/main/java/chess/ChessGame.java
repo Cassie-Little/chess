@@ -11,7 +11,7 @@ import java.util.HashSet;
  */
 public class ChessGame {
     private ChessBoard board;
-    private TeamColor teamTurn;
+    private TeamColor teamTurn = TeamColor.WHITE;
 
     public ChessGame() {
 

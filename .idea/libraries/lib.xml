@@ -2,6 +2,7 @@
   <library name="lib">
     <CLASSES>
       <root url="file://$PROJECT_DIR$/server/lib" />
+      <root url="jar://$PROJECT_DIR$/../../passoff-dependencies.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

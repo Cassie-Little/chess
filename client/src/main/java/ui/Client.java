@@ -1,7 +1,7 @@
 package ui;
 
-import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessPosition;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -51,6 +51,7 @@ public class Client implements NotificationHandler {
                 case "clear" -> clear();
                 case "quit" -> "quit";
                 case "help" -> help();
+                case "highlight" -> highlight(params);
                 default -> help();
             };
         } catch (exception.ResponseException ex) {
@@ -62,6 +63,27 @@ public class Client implements NotificationHandler {
         assertLoggedIn();
         server.clear();
         return "deleted all games and users";
+    }
+
+    public String highlight(String... params) throws ResponseException {
+        if (params.length == 2) {
+            int gameID = Integer.parseInt(params[0]);
+            var chessPosition = parsePosition(params);
+            var gameData = server.getGame(authData.authToken(), gameID);
+            var teamColor = gameData.blackUsername().equals(authData.username()) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+            ChessBoardUI.displayLegalMoves(out, gameData.game().getBoard(), teamColor,chessPosition);
+        }
+        throw new exception.ResponseException(400, "Expected: <position>");
+    }
+
+    private static ChessPosition parsePosition(String[] params) throws ResponseException {
+        var positionStr = params[1].toLowerCase();
+        if (positionStr.length() != 2){
+            throw new ResponseException(400, "Expected: valid position");
+        }
+        var col = positionStr.charAt(0) - 96;
+        var row = positionStr.charAt(1) - 48;
+        return new ChessPosition(row, col);
     }
 
     public String login(String... params) throws exception.ResponseException {
@@ -118,11 +140,7 @@ public class Client implements NotificationHandler {
     public String createGames(String... params) throws ResponseException {
         assertLoggedIn();
         if (params.length == 1) {
-            var game = new ChessGame();
-            var board = new ChessBoard();
-            board.resetBoard();
-            game.setBoard(board);
-            var gameData = new GameData(0, null, null, params[0], game);
+            var gameData = new GameData(0, null, null, params[0], null);
             int gameID = server.createGame(authData.authToken(), gameData).gameID();
             return String.format("you game ID is: %s", gameID);
         }
@@ -199,10 +217,10 @@ public class Client implements NotificationHandler {
 
     @Override
     public void loadGame(LoadGame loadGame) {
-        var blackUser = loadGame.getGameData().blackUsername();
+        var blackUser = loadGame.getBlackPlayer();
         var teamColor = blackUser != null && blackUser.equals(player)? ChessGame.TeamColor.BLACK: ChessGame.TeamColor.WHITE;
-        ChessBoardUI.displayBoard(out, loadGame.getGameData().game().getBoard(), teamColor);
-        String.format("Your game: %s", loadGame.getGameData().gameName());
+        ChessBoardUI.displayBoard(out, loadGame.game().getBoard(), teamColor);
+        String.format("Your game: %s", loadGame.getGameName());
     }
 
     @Override

@@ -35,4 +35,7 @@ public class UserService {
         return new UserData(userData.username(), hash, userData.email());
     }
 
+    public String getUser(String authToken) throws DataAccessException {
+        return authDAO.getUsername(authToken);
+    }
 }
