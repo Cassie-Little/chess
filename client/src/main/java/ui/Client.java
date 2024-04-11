@@ -36,6 +36,7 @@ public class Client implements NotificationHandler {
 
     public Client(String serverURL) throws ResponseException {
         this.serverURL =serverURL;
+        this.webSocket = new WebSocketFacade(serverURL, this);
         server = new ServerFacade(serverURL);
         out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }

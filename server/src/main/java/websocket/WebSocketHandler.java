@@ -59,18 +59,18 @@ public class WebSocketHandler {
             if (!username.equals(player)) {
                 throw new DataAccessException("Error: " + username + " called joinPlayer with wrong team color");
             }
-            connections.add(player, session);
+            connections.add(player, session, gameData.gameID());
             sendLoadGame(session, gameData);
-            broadcastNotification(player, String.format("%s is joining as %s", player, joinPlayer.getPlayerColor()));
+            broadcastNotification(player,gameData.gameID(), String.format("%s is joining as %s", player, joinPlayer.getPlayerColor()));
         } else {
             throw new DataAccessException("bad message");
         }
     }
 
-    private void broadcastNotification(String player, String message) throws IOException {
+    private void broadcastNotification(String player, int gameID, String message) throws IOException {
         var notification = new Notification(message);
         var notificationJson = gson.toJson(notification);
-        connections.broadcast(player, notificationJson);
+        connections.broadcast(player, gameID, notificationJson);
     }
 
     private void sendLoadGame(Session session, GameData gameData) throws IOException {
@@ -81,7 +81,7 @@ public class WebSocketHandler {
     private void broadcastLoadGame(GameData gameData) throws IOException {
         var loadGame = new LoadGame(gameData.game(), gameData.blackUsername(), gameData.whiteUsername(), gameData.gameName());
         var loadGameJson = gson.toJson(loadGame);
-        connections.broadcast("", loadGameJson);
+        connections.broadcast("", gameData.gameID(), loadGameJson);
     }
 
     public void joinObserver(Session session, String message) throws IOException, DataAccessException {
@@ -89,9 +89,9 @@ public class WebSocketHandler {
             var joinObserver = gson.fromJson(message, JoinObserver.class);
             var gameData = gameService.getGame(joinObserver.getAuthString(), joinObserver.getGameID());
             var player = userService.getUser(joinObserver.getAuthString());
-            connections.add(player, session);
+            connections.add(player, session, gameData.gameID());
             sendLoadGame(session, gameData);
-            broadcastNotification(player, String.format("%s is joining an observer", player));
+            broadcastNotification(player, gameData.gameID(), String.format("%s is joining an observer", player));
         } else {
             throw new DataAccessException("bad message");
         }
@@ -114,9 +114,9 @@ public class WebSocketHandler {
         }
         gameData.game().makeMove(makeMove.getMove());
         gameService.updateGame(makeMove.getAuthString(), gameData);
-        connections.add(username, session);
+        connections.add(username, session, gameData.gameID());
         broadcastLoadGame(gameData);
-        broadcastNotification(username, String.format("%s move their %s to position %s", username, piece, makeMove.getMove().getEndPosition()));
+        broadcastNotification(username, gameData.gameID(), String.format("%s move their %s to position %s", username, piece, makeMove.getMove().getEndPosition()));
     }
 
     private ChessGame.TeamColor getTeamColorUser(String username, GameData gameData) throws DataAccessException {
@@ -131,10 +131,10 @@ public class WebSocketHandler {
     public void leave(Session session, String message) throws IOException, DataAccessException {
         var leave = gson.fromJson(message, Leave.class);
         var username = userService.getUser(leave.getAuthString());
-        connections.remove(username);
+        connections.remove(username, leave.getGameID());
         var gameData = gameService.getGame(leave.getAuthString(), leave.getGameID());
         gameService.updateGame(leave.getAuthString(), gameData);
-        broadcastNotification(username, String.format("%s left the game", username));
+        broadcastNotification(username, leave.getGameID(), String.format("%s left the game", username));
     }
 
     public void resign(Session session, String message) throws IOException, DataAccessException {
@@ -149,7 +149,7 @@ public class WebSocketHandler {
         }
         gameData.game().setTeamTurn(ChessGame.TeamColor.NONE);
         gameService.updateGame(resign.getAuthString(), gameData);
-        broadcastNotification("", String.format("%s resigned from the game", username));
+        broadcastNotification("", gameData.gameID(), String.format("%s resigned from the game", username));
 
     }
 
