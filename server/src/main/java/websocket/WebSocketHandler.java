@@ -109,6 +109,9 @@ public class WebSocketHandler {
         if (!piece.getTeamColor().equals(teamColor)){
             throw new DataAccessException("wrong team color");
         }
+        if (!teamColor.equals(gameData.game().getTeamTurn())) {
+            throw new DataAccessException("wrong team");
+        }
         gameData.game().makeMove(makeMove.getMove());
         gameService.updateGame(makeMove.getAuthString(), gameData);
         connections.add(username, session);
@@ -137,11 +140,16 @@ public class WebSocketHandler {
     public void resign(Session session, String message) throws IOException, DataAccessException {
         var resign = gson.fromJson(message, Resign.class);
         var username = userService.getUser(resign.getAuthString());
-        connections.remove(username);
         var gameData = gameService.getGame(resign.getAuthString(), resign.getGameID());
+        if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
+            throw new DataAccessException( username + " cannot resign");
+        }
+        if (gameData.game().getTeamTurn() == ChessGame.TeamColor.NONE){
+            throw new DataAccessException("you already resigned");
+        }
+        gameData.game().setTeamTurn(ChessGame.TeamColor.NONE);
         gameService.updateGame(resign.getAuthString(), gameData);
-        gameData.game().setTeamTurn(null);
-        broadcastNotification(username, String.format("%s resigned from the game", username));
+        broadcastNotification("", String.format("%s resigned from the game", username));
 
     }
 
