@@ -38,27 +38,27 @@ public class GameService {
         var board = new ChessBoard();
         board.resetBoard();
         game.setBoard(board);
-        GameData gameData1 = new GameData(gameData.gameID(), gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game);
-        return this.gameDAO.createGame(gameData1);
+        gameData.setGame(game);
+        return this.gameDAO.createGame(gameData);
     }
 
     public void joinGame(String authToken, JoinGameData joinGameData) throws DataAccessException {
         var username = authDAO.getUsername(authToken);
-        var game = this.gameDAO.getGame(joinGameData.gameID());
+        var gameData = this.gameDAO.getGame(joinGameData.gameID());
         if (joinGameData.playerColor() == null) {
             joinAsWatcher();
             return;
         } else if (joinGameData.playerColor().equals("WHITE")) {
-            if (game.whiteUsername() != null && !game.whiteUsername().equals(username)) {
+            if (gameData.whiteUsername() != null && !gameData.whiteUsername().equals(username)) {
                 throw new DataAccessException("Error: already taken");
             }
-            var gameData = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
+            gameData.setWhiteUsername(username);
             gameDAO.updateGame(gameData);
         } else if (joinGameData.playerColor().equals("BLACK")) {
-            if (game.blackUsername() != null && !game.blackUsername().equals(username)) {
+            if (gameData.blackUsername() != null && !gameData.blackUsername().equals(username)) {
                 throw new DataAccessException("Error: already taken");
             }
-            var gameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+            gameData.setBlackUsername(username);
             gameDAO.updateGame(gameData);
         } else {
             throw new DataAccessException("Error: bad request");

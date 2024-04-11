@@ -51,7 +51,8 @@ public class SQLGameDAO implements GameDAO {
         var id = rs.getInt("id");
         var json = rs.getString("json");
         var gameData = new Gson().fromJson(json, GameData.class);
-        return new GameData(id, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+        gameData.setGameID(id);
+        return gameData;
     }
 
 

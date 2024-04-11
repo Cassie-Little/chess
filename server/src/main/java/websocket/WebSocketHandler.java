@@ -103,6 +103,9 @@ public class WebSocketHandler {
         }
         var makeMove = gson.fromJson(message, MakeMove.class);
         var gameData = gameService.getGame(makeMove.getAuthString(), makeMove.getGameID());
+        if (gameData.completion() != null) {
+            throw new DataAccessException("game completed " + gameData.completion());
+        }
         var username = userService.getUser(makeMove.getAuthString());
         var teamColor = getTeamColorUser(username, gameData);
         var piece = gameData.game().getBoard().getPiece(makeMove.getMove().getStartPosition());
@@ -113,10 +116,40 @@ public class WebSocketHandler {
             throw new DataAccessException("wrong team");
         }
         gameData.game().makeMove(makeMove.getMove());
+        isInCheckmate(gameData, ChessGame.TeamColor.WHITE);
+        isInCheckmate(gameData, ChessGame.TeamColor.BLACK);
+        isInCheck(gameData, ChessGame.TeamColor.WHITE);
+        isInCheck(gameData, ChessGame.TeamColor.BLACK);
+        isInStalemate(gameData, ChessGame.TeamColor.WHITE);
+        isInStalemate(gameData, ChessGame.TeamColor.BLACK);
         gameService.updateGame(makeMove.getAuthString(), gameData);
         connections.add(username, session, gameData.gameID());
         broadcastLoadGame(gameData);
         broadcastNotification(username, gameData.gameID(), String.format("%s move their %s to position %s", username, piece, makeMove.getMove().getEndPosition()));
+    }
+
+    private void isInCheckmate(GameData gameData, ChessGame.TeamColor teamColor) throws IOException {
+        if (gameData.game().isInCheckmate(teamColor)) {
+            var username = teamColor == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
+            String completionStr = username + " " + teamColor + " is in checkmate";
+            gameData.setCompletion(completionStr);
+            broadcastNotification("", gameData.gameID(), completionStr);
+        }
+    }
+    private void isInCheck(GameData gameData, ChessGame.TeamColor teamColor) throws IOException {
+        if (gameData.game().isInCheck(teamColor)) {
+            var username = teamColor == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
+            String completionStr = username + " " + teamColor + " is in check";
+            broadcastNotification("", gameData.gameID(), completionStr);
+        }
+    }
+    private void isInStalemate(GameData gameData, ChessGame.TeamColor teamColor) throws IOException {
+        if (gameData.game().isInStalemate(teamColor)) {
+            var username = teamColor == ChessGame.TeamColor.WHITE ? gameData.whiteUsername() : gameData.blackUsername();
+            String completionStr = username + " " + teamColor + " is in stalemate";
+            gameData.setCompletion(completionStr);
+            broadcastNotification("", gameData.gameID(), completionStr);
+        }
     }
 
     private ChessGame.TeamColor getTeamColorUser(String username, GameData gameData) throws DataAccessException {
@@ -132,8 +165,6 @@ public class WebSocketHandler {
         var leave = gson.fromJson(message, Leave.class);
         var username = userService.getUser(leave.getAuthString());
         connections.remove(username, leave.getGameID());
-        var gameData = gameService.getGame(leave.getAuthString(), leave.getGameID());
-        gameService.updateGame(leave.getAuthString(), gameData);
         broadcastNotification(username, leave.getGameID(), String.format("%s left the game", username));
     }
 
@@ -144,10 +175,10 @@ public class WebSocketHandler {
         if (!username.equals(gameData.whiteUsername()) && !username.equals(gameData.blackUsername())) {
             throw new DataAccessException( username + " cannot resign");
         }
-        if (gameData.game().getTeamTurn() == ChessGame.TeamColor.NONE){
-            throw new DataAccessException("you already resigned");
+        if (gameData.completion() != null){
+            throw new DataAccessException("cannot resign game already completed " + gameData.completion());
         }
-        gameData.game().setTeamTurn(ChessGame.TeamColor.NONE);
+        gameData.setCompletion(username + " resigned");
         gameService.updateGame(resign.getAuthString(), gameData);
         broadcastNotification("", gameData.gameID(), String.format("%s resigned from the game", username));
 
