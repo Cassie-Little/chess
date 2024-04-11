@@ -4,7 +4,7 @@ import chess.ChessGame;
 
 public class LoadGame extends ServerMessage {
 
-    private final ChessGame game;
+    private final ChessGame chessGame;
     private final String blackPlayer;
     private final String whitePlayer;
 
@@ -12,14 +12,14 @@ public class LoadGame extends ServerMessage {
 
     public LoadGame(ChessGame game, String blackPlayer, String whitePlayer, String gameName) {
         super(ServerMessageType.LOAD_GAME);
-        this.game = game;
+        this.chessGame = game;
         this.blackPlayer = blackPlayer;
         this.whitePlayer = whitePlayer;
         this.gameName = gameName;
     }
 
     public ChessGame game() {
-        return game;
+        return chessGame;
     }
 
     public String getBlackPlayer(){

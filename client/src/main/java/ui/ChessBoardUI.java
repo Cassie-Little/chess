@@ -15,8 +15,7 @@ public class ChessBoardUI {
     private static final String EMPTY = " ";
     private static final String[] whiteHeaders = {" ", "a", "b", "c", "d", "e", "f", "g", "h", " "};
     private static final String[] blackHeaders = {" ", "h", "g", "f", "e", "d", "c", "b", "a", " "};
-    private static final String[] whiteSideNums = {"8", "7", "6", "5", "4", "3", "2", "1"};
-    private static final String[] blackSideNums = {"1", "2", "3", "4", "5", "6", "7", "8"};
+    private static final String[] sideNums = {"1", "2", "3", "4", "5", "6", "7", "8"};
 
 
 
@@ -78,11 +77,10 @@ public class ChessBoardUI {
         }
     }
 
-    private static void drawBoardWhite(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
-        var sideNums =  blackSideNums;
+    private static void drawBoardBlack(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
         for (int boardRow = 0; boardRow < 8; ++boardRow) {
             drawSideNumber(out, sideNums[boardRow]);
-            for (int col = 0; col < 8; ++col) {
+            for (int col = 7; col >= 0; --col) {
                 var position = new chess.ChessPosition(boardRow+1, col+1);
                 var piece = board.getPiece(position);
                 drawPiece(out, piece, boardRow, col, possibleMoves);
@@ -92,11 +90,11 @@ public class ChessBoardUI {
         }
 
     }
-    private static void drawBoardBlack(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
-        var sideNums = blackSideNums;
+    private static void drawBoardWhite(PrintStream out, chess.ChessBoard board, Collection<ChessMove> possibleMoves) {
+
         for (int boardRow = 7; boardRow >= 0; --boardRow) {
             drawSideNumber(out, sideNums[boardRow]);
-            for (int col = 7; col >= 0; --col) {
+            for (int col = 0; col < 8; ++col) {
                 var position = new chess.ChessPosition(boardRow+1, col+1);
                 var piece = board.getPiece(position);
                 drawPiece(out, piece, boardRow, col, possibleMoves);
@@ -142,14 +140,14 @@ public class ChessBoardUI {
         }
         else if ((colNumber+ rowNumber) % 2 == 0) {
             if (isPossibleMove){
-                out.print(SET_BG_COLOR_RED);
+                out.print(SET_BG_COLOR + "219m");
             }
             else{
                 out.print(SET_BG_COLOR_MAGENTA);
             }
         } else {
             if (isPossibleMove){
-                out.print(SET_BG_COLOR_GREEN);
+                out.print(SET_BG_COLOR + "28m");
             }
             else {
                 out.print(SET_BG_COLOR_DARK_GREEN);
