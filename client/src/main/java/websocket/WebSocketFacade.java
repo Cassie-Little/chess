@@ -5,10 +5,7 @@ import webSocketMessages.serverMessages.GameError;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.Resign;
+import webSocketMessages.userCommands.*;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -88,6 +85,13 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void makeMove(MakeMove makeMove) throws exception.ResponseException {
+        try {
+            this.session.getBasicRemote().sendText(gson.toJson(makeMove));
+        } catch (IOException ex) {
+            throw new exception.ResponseException(500, ex.getMessage());
+        }
+    }
 
 }
 

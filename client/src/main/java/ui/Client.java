@@ -1,6 +1,8 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import exception.ResponseException;
 import model.AuthData;
@@ -10,10 +12,7 @@ import model.UserData;
 import webSocketMessages.serverMessages.GameError;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.Resign;
+import webSocketMessages.userCommands.*;
 import websocket.NotificationHandler;
 import websocket.WebSocketFacade;
 
@@ -33,6 +32,8 @@ public class Client implements NotificationHandler {
 
 
     private final Scanner scanner;
+    private int gameID;
+    private ChessGame.TeamColor teamColor =  ChessGame.TeamColor.WHITE;
 
 
 
@@ -52,18 +53,19 @@ public class Client implements NotificationHandler {
             return switch (cmd) {
                 case "login" -> login(params);
                 case "register" -> register(params);
-                case "list_games" -> listGames();
+                case "list" -> listGames();
                 case "logout" -> logout();
-                case "join_game" -> joinGame(params);
-                case "observe_game" -> joinAsObserver(params);
-                case "create_game" -> createGames(params);
+                case "join" -> joinGame(params);
+                case "observe" -> joinAsObserver(params);
+                case "create" -> createGames(params);
                 case "clear" -> clear();
                 case "quit" -> "quit";
                 case "help" -> help();
                 case "highlight" -> highlight(params);
-                case "redraw_board" -> redrawBoard(params);
+                case "redraw" -> redrawBoard(params);
                 case "resign" -> resign(params);
                 case "leave" -> leave(params);
+                case "move" -> makeMove(params);
                 default -> help();
             };
         } catch (exception.ResponseException ex) {
@@ -78,9 +80,9 @@ public class Client implements NotificationHandler {
     }
 
     public String highlight(String... params) throws ResponseException {
-        if (params.length == 2) {
-            var gameID = Integer.parseInt(params[0]);
-            var chessPosition = parsePosition(params);
+        assertObserveGame();
+        if (params.length == 1) {
+            var chessPosition = parsePosition(params[0]);
             var gameData = server.getGame(authData.authToken(), gameID);
             var teamColor = gameData.blackUsername().equals(authData.username()) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             ChessBoardUI.displayLegalMoves(out, gameData.game().getBoard(), teamColor, chessPosition);
@@ -89,42 +91,58 @@ public class Client implements NotificationHandler {
     }
 
     public String redrawBoard(String... params) throws ResponseException {
-        if (params.length == 2) {
-            String teamColorString = params[1].toUpperCase();
+        assertObserveGame();
+        if (params.length == 1) {
+            String teamColorString = params[0].toUpperCase();
             var teamColor = Enum.valueOf(ChessGame.TeamColor.class, teamColorString);
-            var gameID = Integer.parseInt(params[0]);
             var gameData = server.getGame(authData.authToken(), gameID);
             ChessBoardUI.displayBoard(out,gameData.game().getBoard(), teamColor);
             return "here's your board";
         }
-        throw new exception.ResponseException(400, "Expected: <gameID> <position>");
+        throw new exception.ResponseException(400, "Expected: <position>");
     }
 
     public String leave(String... params) throws ResponseException {
-        if (params.length != 1){
-            throw new ResponseException(400, "Expected: gameID");
+        assertObserveGame();
+        if (params.length != 0){
+            throw new ResponseException(400, "Expected: nothing");
         }
-        var gameID = Integer.parseInt(params[0]);
         webSocket.leave(new Leave(authData.authToken(), gameID));
         return help();
     }
 
     public String resign(String... params) throws ResponseException {
-        if (params.length == 1) {
-            var gameID = Integer.parseInt(params[0]);
+        assertPlayGame();
+        if (params.length == 0) {
             System.out.print("Are you sure you want to resign?");
             var input = scanner.nextLine().toLowerCase();
             if (input.equals("yes")) {
                 webSocket.resign(new Resign(authData.authToken(), gameID));
             }
-            return "";
+            return "resigned";
         }
-        throw new ResponseException(400, "Expected: gameID");
+        throw new ResponseException(400, "Expected: nothing");
     }
 
+    public String makeMove(String... params) throws ResponseException {
+        assertPlayGame();
+        if (params.length != 2 && params.length != 3) {
+            throw new ResponseException(400, "Expected  <start position> <end position>");
+        }
+        var startPosition = parsePosition(params[0]);
+        var endPosition = parsePosition(params[1]);
+        ChessPiece.PieceType pieceType = null;
+        if (params.length == 3) {
+            var pieceString  = params[2].toUpperCase();
+            pieceType = Enum.valueOf(ChessPiece.PieceType.class, pieceString);
+        }
+        ChessMove chessMove = new ChessMove(startPosition, endPosition, pieceType);
+        webSocket.makeMove(new MakeMove(authData.authToken(), gameID, chessMove));
+        return "move sent";
+    }
 
-    private static ChessPosition parsePosition(String[] params) throws ResponseException {
-        var positionStr = params[1].toLowerCase();
+    private static ChessPosition parsePosition(String positionStr) throws ResponseException {
+        positionStr=  positionStr.toLowerCase();
         if (positionStr.length() != 2){
             throw new ResponseException(400, "Expected: valid position");
         }
@@ -134,6 +152,7 @@ public class Client implements NotificationHandler {
     }
 
     public String login(String... params) throws exception.ResponseException {
+        assertLoggedOut();
         if (params.length == 2) {
             var userData = new UserData(params[0], params[1], null);
             authData = server.login(userData);
@@ -145,7 +164,7 @@ public class Client implements NotificationHandler {
     }
 
     public String register(String... params) throws ResponseException {
-        state = State.LOGGEDOUT;
+        assertLoggedOut();
         if (params.length == 3) {
             var userData = new UserData(params[0], params[1], params[2]);
             authData = server.register(userData);
@@ -197,16 +216,17 @@ public class Client implements NotificationHandler {
 
     public String joinGame(String... params) throws ResponseException {
         assertLoggedIn();
-        if (params.length >= 1) {
-            var gameID = Integer.parseInt(params[0]);
-            String teamColorString = params.length == 2 ? params[1].toUpperCase() : null;
-            var joinGameData = new JoinGameData(teamColorString, gameID);
+        if (params.length == 1) {
+            return joinAsObserver(params);
+        } else if (params.length == 2) {
+            gameID = Integer.parseInt(params[0]);
+            teamColor = Enum.valueOf(ChessGame.TeamColor.class, params[1].toUpperCase());
+            var joinGameData = new JoinGameData(params[1].toUpperCase(), gameID);
             server.joinGame(authData.authToken(), joinGameData);
-            if (teamColorString != null) {
-                var teamColor = Enum.valueOf(ChessGame.TeamColor.class, teamColorString);
-                webSocket.joinPlayer(new JoinPlayer(authData.authToken(), gameID, teamColor ));
-            }
-            return "";
+            var gameData = server.getGame(authData.authToken(), gameID);
+            webSocket.joinPlayer(new JoinPlayer(authData.authToken(), gameID, teamColor));
+            state = State.PLAYGAME;
+            return String.format("You're playing game: %s \n %s", gameData.gameName() , help());
         }
         throw new ResponseException(400, "Expected: <gameID> <player_color_(white/black/empty)>");
     }
@@ -214,45 +234,81 @@ public class Client implements NotificationHandler {
     public String joinAsObserver(String... params) throws ResponseException {
         assertLoggedIn();
         if (params.length == 1) {
-            var gameID = Integer.parseInt(params[0]);
+            gameID = Integer.parseInt(params[0]);
             var joinGameData = new JoinGameData(null, gameID);
             server.joinGame(authData.authToken(), joinGameData);
             var gameData = server.getGame(authData.authToken(), gameID);
             webSocket.joinObserver(new JoinObserver(authData.authToken(), gameID ));
             ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.WHITE);
             ChessBoardUI.displayBoard(out, gameData.game().getBoard(), ChessGame.TeamColor.BLACK);
-            return String.format("Your game: %s", gameData.gameName());
+            state = State.OBSERVEGAME;
+            return String.format("You're observing game: %s \n %s", gameData.gameName(), help());
         }
         throw new ResponseException(400, "Expected: <gameID>");
     }
 
 
     public String help() {
-        if (state == State.LOGGEDOUT) {
-            return """
+        return switch (state) {
+            case LOGGEDOUT -> """
                     - login <username> <password>
                     - register <username> <password> <email>
                     - quit
                     - help
                     """;
-        }
-        return """
-                - list_games
-                - create_game <enter a name>
-                - join_game <gameID> <enter black or white>
-                - observe_game <gameID>
-                - redraw_board <gameID> <your color>
-                - highlight <gameID> <position (ex. a2)>
-                - logout
-                - quit
-                - clear
-                -help
-                """;
+            case LOGGEDIN -> """
+                    - list
+                    - create <enter a name>
+                    - join <gameID> <enter black or white>
+                    - observe <gameID>
+                    - logout
+                    - quit
+                    - clear
+                    - help
+                    """;
+            case PLAYGAME -> """
+                    - redraw  <your color>
+                    - highlight  <position (ex. a2)>
+                    - move  <start position> <end position> [<promotion piece>]
+                    - leave
+                    - resign
+                    - logout
+                    - quit
+                    - clear
+                    - help
+                    """;
+            case OBSERVEGAME ->  """
+                    - redraw  <your color>
+                    - highlight  <position (ex. a2)>
+                    - leave
+                    - logout
+                    - quit
+                    - clear
+                    - help
+                    """;
+        };
     }
 
     private void assertLoggedIn() throws ResponseException {
         if (state == State.LOGGEDOUT) {
             throw new ResponseException(400, "Please login or register :)");
+        }
+    }
+    private void assertObserveGame() throws ResponseException {
+        assertLoggedIn();
+        if (state != State.OBSERVEGAME && state != State.PLAYGAME) {
+            throw new ResponseException(400, "please join or observe a game");
+        }
+    }
+    private void assertPlayGame() throws ResponseException {
+        assertObserveGame();
+        if (state != State.PLAYGAME) {
+            throw new ResponseException(400, "please join or observe a game");
+        }
+    }
+    private void assertLoggedOut() throws ResponseException {
+        if (state != State.LOGGEDOUT) {
+            throw new ResponseException(400, "You are logged in");
         }
     }
 
@@ -266,11 +322,8 @@ public class Client implements NotificationHandler {
     @Override
     public void loadGame(LoadGame loadGame) {
         try {
-            var blackUser = loadGame.getBlackPlayer();
-            var teamColor = blackUser != null && blackUser.equals(player) ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
             ChessBoardUI.displayBoard(out, loadGame.game().getBoard(), teamColor);
             System.out.println(String.format("Your game: %s", loadGame.getGameName()));
-            System.out.flush();
         }
         catch (Exception e) {
             System.out.println(e.toString());
