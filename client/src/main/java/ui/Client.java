@@ -297,18 +297,18 @@ public class Client implements NotificationHandler {
     private void assertObserveGame() throws ResponseException {
         assertLoggedIn();
         if (state != State.OBSERVEGAME && state != State.PLAYGAME) {
-            throw new ResponseException(400, "please join or observe a game");
+            throw new ResponseException(400, "please join or observe a game :)");
         }
     }
     private void assertPlayGame() throws ResponseException {
         assertObserveGame();
         if (state != State.PLAYGAME) {
-            throw new ResponseException(400, "please join or observe a game");
+            throw new ResponseException(400, "please join or observe a game :)");
         }
     }
     private void assertLoggedOut() throws ResponseException {
         if (state != State.LOGGEDOUT) {
-            throw new ResponseException(400, "You are logged in");
+            throw new ResponseException(400, "You are logged in :)");
         }
     }
 
